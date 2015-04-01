@@ -5,6 +5,7 @@
 
 #include  <msp430g2553.h>
 
+#define SETDIR P1DIR = P1DIR | BIT3 | BIT0 | BIT1
 #define DR P1OUT = P1OUT | BIT3 // define RS high
 #define CWR P1OUT = P1OUT & (~BIT3) // define RS low
 #define READ P1OUT = P1OUT | BIT0
@@ -82,8 +83,14 @@ void send_string(char *s)
 
 void lcd_init(void)
 {
-	P1DIR |= 0xFF;
-	P1OUT &= 0x00;
+	//P1DIR |= 0xFF;
+	//P1OUT &= 0x00;
+	//push button code
+	SETDIR;
+	CWR;
+	WRITE;
+	ENABLE_LOW;
+	//----------------
 	P2DIR |= 0XFF;
 	P2OUT &= 0XFF;
 	send_command(0x33);

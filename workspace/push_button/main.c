@@ -5,6 +5,7 @@
  */
 
 volatile    int flag    =   0;
+volatile	int count	=	0;
 
 int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
@@ -22,6 +23,7 @@ int main(void) {
 		{
 			//   Do  Something
 			flag =   0;
+			count++;
 		}
 	}
 
