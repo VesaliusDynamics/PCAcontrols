@@ -19,7 +19,7 @@ void main (void){
 	lcd_init();
 	send_string("Change some of");
 	send_command(0xC0);
-	send_string("THE THINGS???");
+	send_string("THE THINGS");
 
     unsigned int servo_stepval, servo_stepnow;
     unsigned int servo_lut[ SERVO_STEPS+1 ];
