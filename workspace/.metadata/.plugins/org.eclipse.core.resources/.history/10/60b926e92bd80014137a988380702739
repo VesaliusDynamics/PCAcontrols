@@ -11,8 +11,6 @@
 #define SERVO_MIN           700     // The minimum duty cycle for this servo
 #define SERVO_MAX           3000    // The maximum duty cycle
 
-#define CHECK_BIT(var,pos) ((var) & (1<<(pos))) //push button
-
 unsigned int PWM_Period     = (MCU_CLOCK / PWM_FREQUENCY);  // PWM Period
 unsigned int PWM_Duty       = 0;                            // %
 
@@ -116,9 +114,16 @@ void main (void){
 #pragma vector=PORT1_VECTOR
 __interrupt void    Port_1(void)
 {
-	if (CHECK_BIT(P1IFG, 6)){
-		__delay_cycles(50000);	//debounce code
+	int test;
+	switch(P1IFG){
+	case BIT6:
+		__delay_cycles(40000);	//debounce code
 		flag   =   1;
 		P1IFG  &=  (~BIT6);    //  P1.6    IFG clear
+		break;
+	default:
+		test++;
+		break;
 	}
+
 }
