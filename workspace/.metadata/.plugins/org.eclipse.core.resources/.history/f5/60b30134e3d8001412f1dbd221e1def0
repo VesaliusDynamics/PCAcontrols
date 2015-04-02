@@ -64,7 +64,6 @@ void main (void){
 	P1IES  |=  (BIT7); //  Falling Edge    1   ->  0
 	P1IFG  &=  (~BIT7);    //  Clear   interrupt   flag    for P1.6
 	P1IE   |=  (BIT7); //  Enable  interrupt   for P1.6
-
 	__enable_interrupt();  //  Enable  Global  Interrupts
 	//end push button code
 
@@ -144,6 +143,6 @@ __interrupt void    Port_1(void)
 		//P1.7 pin triggered
 		__delay_cycles(50000);	//debounce code
 		flag   =   2;
-		P1IFG  &=  (~BIT7);    //  P1.7    IFG clear
+		P1IFG  &=  (~BIT7);    //  P1.6    IFG clear
 	}
 }

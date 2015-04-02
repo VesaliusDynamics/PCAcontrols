@@ -11,9 +11,11 @@
 "..\four_bit_lcd.h", line 25: remark #1527-D: (ULP 2.1) Detected SW delay loop using empty loop. Recommend using a timer module instead
 "../main.c", line 31: warning #552-D: variable "servo_lut" was set but never used
 "../main.c", line 39: remark #1544-D: (ULP 13.1) Detected loop counting up. Recommend loops count down as detecting zeros is easier
-"../main.c", line 74: remark #1532-D: (ULP 5.3) Detected sprintf() operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../main.c", line 83: remark #1532-D: (ULP 5.3) Detected sprintf() operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
+"../main.c", line 94: remark #1532-D: (ULP 5.3) Detected sprintf() operation(s). Recommend moving them to RAM during run time or not using as these are processing/power intensive
 "../main.c", line 30: remark #1535-D: (ULP 8.1) variable "servo_stepval" is used as a constant. Recommend declaring variable as either 'static const' or 'const'
-"../main.c", line 120: remark #1527-D: (ULP 2.1) Detected SW delay loop using __delay_cycles. Recommend using a timer module instead
+"../main.c", line 140: remark #1527-D: (ULP 2.1) Detected SW delay loop using __delay_cycles. Recommend using a timer module instead
+"../main.c", line 145: remark #1527-D: (ULP 2.1) Detected SW delay loop using __delay_cycles. Recommend using a timer module instead
 "../main.c", line 16: remark #1535-D: (ULP 8.1) variable "PWM_Period" is used as a constant. Recommend declaring variable as either 'static const' or 'const'
 "../main.c", line 17: remark #1535-D: (ULP 8.1) variable "PWM_Duty" is used as a constant. Recommend declaring variable as either 'static const' or 'const'
 'Finished building: ../main.c'
