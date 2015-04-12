@@ -1,0 +1,497 @@
+#include  <msp430g2553.h>
+#include "four_bit_lcd.h"
+#include <stdio.h>
+
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos))) //push button
+
+#define MCU_CLOCK           1100000
+#define PWM_FREQUENCY       46      // In Hertz, ideally 50Hz.
+
+#define SERVO_STEPS         180     // Maximum amount of steps in degrees (180 is common)
+#define SERVO_MIN           700     // The minimum duty cycle for this servo
+#define SERVO_MAX           3000    // The maximum duty cycle
+
+#define FILL_DEGREES		50		//Servo position to fill dosage capsule
+#define DISPENSE_DEGREES	135		//Servo position to dispense dosage capsule
+
+#define CAPSULE_VOLUME		0.9	   //volume in mL of dosage capsule
+#define DISPENSE_TIME       60     //time to dispense dosage capsule
+
+unsigned int PWM_Period     = (MCU_CLOCK / PWM_FREQUENCY);  // PWM Period
+unsigned int PWM_Duty       = 0;                            // %
+
+
+typedef enum {
+	D_BOLUS_DOSAGE,
+	D_BOLUS_TIME,
+	D_FLOW_RATE,
+	D_FACTORY_RESET,
+	D_ALL_RESET,
+	P_FLOW_RATE,
+	P_BOLUS_COUNTDOWN,
+	P_TOTAL_DELIVERED
+} screenState;
+
+typedef enum {
+	NONE,
+	UP,
+	DOWN,
+	BOLUS,
+	RESET
+} buttons;
+
+typedef enum {
+    FILL,
+    DISPENSE
+} valveState;
+
+volatile    buttons button    =   NONE;		//push button
+volatile	int count	=	0;		//push button
+volatile    valveState valve = FILL;
+
+const int DEFAULT_BOLUS_DOSAGE = 0;
+const int DEFAULT_BOLUS_MINS = 60;
+const int DEFAULT_FLOW_RATE = 0;
+
+volatile int bolus_dosage = DEFAULT_BOLUS_DOSAGE;
+volatile int bolus_mins = DEFAULT_BOLUS_MINS;
+volatile int flow_rate = DEFAULT_FLOW_RATE;
+volatile int total_delivered = 0;
+volatile int bolus_active = 0;
+
+const int MAX_BOLUS_DOSAGE = 100; 	//maximum allowable bolus dosage (in mL)
+const int MAX_BOLUS_MINS = 480;		//maximum allowable minutes between bolus dosages
+const int MINIMUM_BOLUS_MINS = 10;	//minimum amount of time between bolus dosages
+const int MAX_FLOW_RATE = 20;		//maximum allowable primary flow rate (mL/hour)
+const int MIN_FLOW_RATE = 0;		//minimum allowable primary flow rate (mL/hour)
+
+volatile int current_time = 0;
+volatile int next_valve_change = 0;
+volatile int bolus_countdown = DEFAULT_BOLUS_MINS * 60;
+volatile int bolus_countdown_prev = DEFAULT_BOLUS_MINS * 60;
+
+//flags for changed state
+volatile int flow_rate_changed = 1;
+volatile int bolus_dosage_changed = 0;
+volatile double dosage_cycle = 0;
+volatile double fill_time = 0;
+
+void main (void){
+
+	WDTCTL = WDTPW + WDTHOLD; // stop watchdog timer
+
+    //push button code
+    {
+    //setting P1.4
+	P1SEL  &=  (~BIT4);    //  Set P1.4    SEL as  GPIO
+	P1DIR  &=  (~BIT4);    //  Set P1.4    SEL as  Input
+	P1IES  |=  (BIT4); //  Falling Edge    1   ->  0
+	P1IFG  &=  (~BIT4);    //  Clear   interrupt   flag    for P1.4
+	P1IE   |=  (BIT4); //  Enable  interrupt   for P1.4
+
+    //setting P1.5
+	P1SEL  &=  (~BIT5);    //  Set P1.5    SEL as  GPIO
+	P1DIR  &=  (~BIT5);    //  Set P1.5    SEL as  Input
+	P1IES  |=  (BIT5); //  Falling Edge    1   ->  0
+	P1IFG  &=  (~BIT5);    //  Clear   interrupt   flag    for P1.5
+	P1IE   |=  (BIT5); //  Enable  interrupt   for P1.5
+
+    //setting P1.6
+	P1SEL  &=  (~BIT6);    //  Set P1.6    SEL as  GPIO
+	P1DIR  &=  (~BIT6);    //  Set P1.6    SEL as  Input
+	P1IES  |=  (BIT6); //  Falling Edge    1   ->  0
+	P1IFG  &=  (~BIT6);    //  Clear   interrupt   flag    for P1.6
+	P1IE   |=  (BIT6); //  Enable  interrupt   for P1.6
+
+	//setting P1.7
+	P1SEL  &=  (~BIT7);    //  Set P1.6    SEL as  GPIO
+	P1DIR  &=  (~BIT7);    //  Set P1.6    SEL as  Input
+	P1IES  |=  (BIT7); //  Falling Edge    1   ->  0
+	P1IFG  &=  (~BIT7);    //  Clear   interrupt   flag    for P1.7
+	P1IE   |=  (BIT7); //  Enable  interrupt   for P1.7
+    }
+    //end push button code
+
+    
+    //setting up timer A0
+    TA0CCR0 = 12000;   //sets counter limit, should interrupt every 1sec
+    TA0CCTL0 = 0x10;       //enable timer interrupts
+    TA0CTL = TASSEL_1 + MC_1;   //uses 12kHz clock as source for counting
+    
+    unsigned int servo_stepval, servo_stepnow;
+    unsigned int servo_lut[ SERVO_STEPS+1 ];
+    unsigned int i;
+    
+    // Calculate the step value and define the current step, defaults to minimum.
+    servo_stepval   = ( (SERVO_MAX - SERVO_MIN) / SERVO_STEPS );
+    servo_stepnow   = SERVO_MIN;
+    
+    // Fill up the LUT
+    for (i = 0; i < SERVO_STEPS; i++) {
+        servo_stepnow += servo_stepval;
+        servo_lut[i] = servo_stepnow;
+    }
+    
+    // Setup the PWM, etc.
+    TACCTL1 = OUTMOD_7;            // TACCR1 reset/set
+    TACTL   = TASSEL_2 + MC_1;     // SMCLK, upmode
+    TACCR0  = PWM_Period-1;        // PWM Period
+    TACCR1  = PWM_Duty;            // TACCR1 PWM Duty Cycle
+    P1DIR   |= BIT2;               // P1.2 = output
+    P1SEL   |= BIT2;               // P1.2 = TA1 output
+	__enable_interrupt();  //  Enable  Global  Interrupts
+
+
+
+	screenState state = D_BOLUS_DOSAGE;
+	char str[16];
+	sprintf(str, "%d mL", bolus_dosage);
+	print_screen("Bolus dosage:", str);
+    TACCR1 = servo_lut[FILL_DEGREES];
+    
+
+    // Main loop
+    while (1){
+    	switch(state){
+    	case D_BOLUS_DOSAGE:
+    		if (button==UP){
+    			button = NONE;
+    			if (bolus_dosage < MAX_BOLUS_DOSAGE){
+    				bolus_dosage++;
+    			}
+    			str[0] = 0;
+    			sprintf(str, "%d mL", bolus_dosage);
+    			print_screen("Bolus dosage:", str);
+    		} else if (button==DOWN){
+    			button = NONE;
+    			if (bolus_dosage > 0){
+    				bolus_dosage--;
+    			}
+    			str[0] = 0;
+    			sprintf(str, "%d mL", bolus_dosage);
+    			print_screen("Bolus dosage:", str);
+    		} else if (button==RESET){
+    			button = NONE;
+    			state = P_FLOW_RATE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+    		} else if (button==BOLUS){
+    			button = NONE;
+    			state = D_BOLUS_TIME;
+    			str[0] = 0;
+    			sprintf(str, "%d minutes", bolus_mins);
+    			print_screen("Bolus time:", str);
+    		}
+
+    		break;
+
+    	case D_BOLUS_TIME:
+    		if (button==UP){
+    			button = NONE;
+    			if (bolus_mins < MAX_BOLUS_MINS - 5){
+    				bolus_mins = bolus_mins + 5;
+    			} else {
+    				bolus_mins = MAX_BOLUS_MINS;
+    			}
+                bolus_countdown = bolus_mins*60;
+    			str[0] = 0;
+    			sprintf(str, "%d minutes", bolus_mins);
+    			print_screen("Bolus time:", str);
+
+    		} else if (button==DOWN){
+    			button = NONE;
+    			if (bolus_mins > MINIMUM_BOLUS_MINS + 5){
+    				bolus_mins = bolus_mins - 5;
+    			} else {
+    				bolus_mins = MINIMUM_BOLUS_MINS;
+    			}
+                bolus_countdown = bolus_mins*60;
+    			str[0] = 0;
+    			sprintf(str, "%d minutes", bolus_mins);
+    			print_screen("Bolus time:", str);
+
+    		} else if (button==RESET){
+    			button = NONE;
+    			state = P_FLOW_RATE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+
+    		} else if (button==BOLUS){
+    			button = NONE;
+    			state = D_FLOW_RATE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+
+    		}
+
+    		break;
+
+    	case D_FLOW_RATE:
+    		if (button==UP){
+    			button = NONE;
+    			if (flow_rate < MAX_FLOW_RATE){
+    				flow_rate++;
+    			} else {
+    				flow_rate = MAX_FLOW_RATE;
+    			}
+                flow_rate_changed = 1;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+
+    		} else if (button==DOWN){
+    			button = NONE;
+    			if (flow_rate > MIN_FLOW_RATE){
+    				flow_rate--;
+    			} else {
+    				flow_rate = MIN_FLOW_RATE;
+    			}
+                flow_rate_changed = 1;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+
+    		} else if (button==RESET){
+    			button = NONE;
+    			state = P_FLOW_RATE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+
+    		} else if (button==BOLUS){
+    			button = NONE;
+    			state = D_FACTORY_RESET;
+    			print_screen("To factory reset", "press RESET now");
+
+    		}
+
+    		break;
+
+    	case D_FACTORY_RESET:
+    		if(button==RESET){
+    			button = NONE;
+    			factoryReset();
+    			state = D_ALL_RESET;
+                flow_rate_changed = 1;
+    			print_screen("All values reset", "Press any key");
+    		} else if (button==UP || button==DOWN || button==BOLUS){
+    			button = NONE;
+    			state = D_BOLUS_DOSAGE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL", bolus_dosage);
+    			print_screen("Bolus dosage:", str);
+    		}
+
+    		break;
+
+    	case D_ALL_RESET:
+    		if(button!=NONE){
+    			button = NONE;
+    			state = D_BOLUS_DOSAGE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL", bolus_dosage);
+    			print_screen("Bolus dosage:", str);
+    		}
+
+    		break;
+
+    	case P_FLOW_RATE:
+    		if (button==UP){
+    			button = NONE;
+    			state = P_TOTAL_DELIVERED;
+    			str[0] = 0;
+    			sprintf(str, "%d mL", total_delivered);
+    			print_screen("Total delivered:", str);
+
+    		} else if (button==DOWN){
+    			button = NONE;
+    			state = P_BOLUS_COUNTDOWN;
+    			printBolusCountdown();
+
+    		} else if (button==RESET){
+    			button = NONE;
+    			state = D_BOLUS_DOSAGE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL", bolus_dosage);
+    			print_screen("Bolus dosage:", str);
+
+    		} else if (button==BOLUS){
+    			button = NONE;
+    			state = P_BOLUS_COUNTDOWN;
+    			deliverBolusDosage();
+    			printBolusCountdown();
+
+    		}
+
+    		break;
+
+    	case P_BOLUS_COUNTDOWN:
+    		if (button==UP){
+    			button = NONE;
+    			state = P_FLOW_RATE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+
+    		} else if (button==DOWN){
+    			button = NONE;
+    			state = P_TOTAL_DELIVERED;
+    			str[0] = 0;
+    			sprintf(str, "%d mL", total_delivered);
+    			print_screen("Total delivered:", str);
+
+
+    		} else if (button==RESET){
+    			button = NONE;
+    			state = D_BOLUS_DOSAGE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL", bolus_dosage);
+    			print_screen("Bolus dosage:", str);
+
+    		} else if (button==BOLUS){
+    			button = NONE;
+    			state = P_BOLUS_COUNTDOWN;
+    			deliverBolusDosage();
+    			printBolusCountdown();
+
+    		}
+
+    		break;
+
+    	case P_TOTAL_DELIVERED:
+    		if (button==UP){
+    			button = NONE;
+    			state = P_BOLUS_COUNTDOWN;
+    			printBolusCountdown();
+
+    		} else if (button==DOWN){
+    			button = NONE;
+    			state = P_FLOW_RATE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL/hour", flow_rate);
+    			print_screen("Flow rate:", str);
+
+    		} else if (button==RESET){
+    			button = NONE;
+    			state = D_BOLUS_DOSAGE;
+    			str[0] = 0;
+    			sprintf(str, "%d mL", bolus_dosage);
+    			print_screen("Bolus dosage:", str);
+
+    		} else if (button==BOLUS){
+    			button = NONE;
+    			state = P_BOLUS_COUNTDOWN;
+    			deliverBolusDosage();
+    			printBolusCountdown();
+
+    		}
+
+    		break;
+
+    	default:
+    		//TODO
+    		//throw some sort of error condition
+    		//turn flow off or something?
+    		break;
+    	}
+        
+        if (flow_rate_changed)
+            recalculate_times();
+        
+        if (state >= P_FLOW_RATE) {
+        
+            switch (valve) {
+                case FILL:
+                    if (current_time >= next_valve_change) {
+                        TACCR1 = servo_lut[DISPENSE_DEGREES];
+                        next_valve_change = current_time + DISPENSE_TIME;
+                        valve = DISPENSE;
+                    }
+                    break;
+                    
+                case DISPENSE:
+                    if (current_time >= next_valve_change) {
+                        TACCR1 = servo_lut[FILL_DEGREES];
+                        total_delivered += CAPSULE_VOLUME;
+                        next_valve_change = current_time + fill_time;
+                    }
+                    
+                    break;
+                    
+                    
+                default:
+                    break;
+            }
+        
+        }
+
+   }
+}
+
+int printBolusCountdown(){
+    int minutes_left = bolus_countdown%60;
+    bolus_countdown_prev = minutes_left;
+    //str[0] = 0;
+    //sprintf(str, "%d min", minutes_left);
+	//print_screen("Bolus countdown:", str);
+	print_screen("Bolus countdown:", "TODO");
+	return 0;
+}
+
+int deliverBolusDosage(){
+	//TODO
+	return 0;
+}
+
+int factoryReset(){
+	bolus_dosage = DEFAULT_BOLUS_DOSAGE;
+	bolus_mins = DEFAULT_BOLUS_MINS;
+	flow_rate = DEFAULT_FLOW_RATE;
+
+	return 0;
+}
+
+void recalculate_times(){
+    dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
+    fill_time = (dosage_cycle - DISPENSE_TIME);	//total time to leave valve on dispense
+    flow_rate_changed = 0;
+    
+}
+
+//  Port    1   interrupt   service routine
+//  used with push button code
+#pragma vector=PORT1_VECTOR
+__interrupt void    Port_1(void)
+{
+	if (CHECK_BIT(P1IFG, 4)){
+		//P1.4 pin triggered
+		__delay_cycles(50000);	//debounce code
+		button   =   BOLUS;
+		P1IFG  &=  (~BIT4);    //  P1.4    IFG clear
+	} else if (CHECK_BIT(P1IFG, 5)) {
+		//P1.7 pin triggered
+		__delay_cycles(50000);	//debounce code
+		button   =   RESET;
+		P1IFG  &=  (~BIT5);    //  P1.5    IFG clear
+	} else if (CHECK_BIT(P1IFG, 6)){
+		//P1.6 pin triggered
+		__delay_cycles(50000);	//debounce code
+		button   =   UP;
+		P1IFG  &=  (~BIT6);    //  P1.6    IFG clear
+	} else if (CHECK_BIT(P1IFG, 7)) {
+		//P1.7 pin triggered
+		__delay_cycles(50000);	//debounce code
+		button   =   DOWN;
+		P1IFG  &=  (~BIT7);    //  P1.7    IFG clear
+	}
+}
+
+#pragma vector=TIMER0_A0_VECTOR
+__interrupt void Timer_A0 (void){
+    current_time++;
+    bolus_countdown_prev = bolus_countdown;
+    bolus_countdown--;
+}

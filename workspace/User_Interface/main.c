@@ -1,6 +1,7 @@
 #include  <msp430g2553.h>
 #include "four_bit_lcd.h"
 #include <stdio.h>
+#include <string.h>
 
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos))) //push button
 
@@ -14,7 +15,6 @@
 #define FILL_DEGREES		50		//Servo position to fill dosage capsule
 #define DISPENSE_DEGREES	135		//Servo position to dispense dosage capsule
 
-#define CAPSULE_VOLUME		0.9	   //volume in mL of dosage capsule
 #define DISPENSE_TIME       60     //time to dispense dosage capsule
 
 unsigned int PWM_Period     = (MCU_CLOCK / PWM_FREQUENCY);  // PWM Period
@@ -52,6 +52,8 @@ volatile    valveState valve = FILL;
 const int DEFAULT_BOLUS_DOSAGE = 0;
 const int DEFAULT_BOLUS_MINS = 60;
 const int DEFAULT_FLOW_RATE = 0;
+const float CAPSULE_VOLUME = 0.9;		//volume in mL of dosage capsule
+
 
 volatile int bolus_dosage = DEFAULT_BOLUS_DOSAGE;
 volatile int bolus_mins = DEFAULT_BOLUS_MINS;
@@ -65,15 +67,15 @@ const int MINIMUM_BOLUS_MINS = 10;	//minimum amount of time between bolus dosage
 const int MAX_FLOW_RATE = 20;		//maximum allowable primary flow rate (mL/hour)
 const int MIN_FLOW_RATE = 0;		//minimum allowable primary flow rate (mL/hour)
 
-volatile int current_time = 0;
+volatile size_t current_time = 0;
 volatile int next_valve_change = 0;
-volatile int bolus_countdown = bolus_mins*60;
-volatile int bolus_countdown_prev = bolus_countdown;
+volatile int bolus_countdown = DEFAULT_BOLUS_MINS * 60;
+volatile int bolus_countdown_prev = DEFAULT_BOLUS_MINS * 60;
 
 //flags for changed state
 volatile int flow_rate_changed = 1;
 volatile int bolus_dosage_changed = 0;
-volatile double dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);
+volatile double dosage_cycle = 0;
 volatile double fill_time = 0;
 
 void main (void){
@@ -398,11 +400,13 @@ void main (void){
     		break;
     	}
         
-        if (flow_rate_changed)
+        if (flow_rate_changed){
             recalculate_times();
+        }
         
-        if (state >= P_FLOW_RATE) {
-        
+
+        if (state == P_FLOW_RATE || state == P_BOLUS_COUNTDOWN || state == P_TOTAL_DELIVERED) {
+
             switch (valve) {
                 case FILL:
                     if (current_time >= next_valve_change) {
@@ -417,6 +421,7 @@ void main (void){
                         TACCR1 = servo_lut[FILL_DEGREES];
                         total_delivered += CAPSULE_VOLUME;
                         next_valve_change = current_time + fill_time;
+                        valve = FILL;
                     }
                     
                     break;
@@ -427,17 +432,31 @@ void main (void){
             }
         
         }
-
+        if(state==P_BOLUS_COUNTDOWN && (bolus_countdown%60)<bolus_countdown_prev){
+        	printBolusCountdown();
+        }
    }
 }
 
 int printBolusCountdown(){
+
     int minutes_left = bolus_countdown%60;
     bolus_countdown_prev = minutes_left;
-    str[0] = 0;
-    sprintf(str, "%d min", minutes_left);
-	print_screen("Bolus countdown:", str);
+    char minutes[16] = 0;
+    if (minutes_left>=10){
+    	minutes[0] = minutes_left%10 + '0';
+    	minutes[1] = minutes_left - (minutes_left%10)*10 + '0';
+    }else{
+    	minutes[0]= minutes_left + '0';
+    }
+    char min[4] = " min";
+    strcat(minutes,min);
+    //char str[16];
+    //sprintf(str, "%d min", minutes_left);
+	print_screen("Bolus countdown:", minutes);
+
 	return 0;
+
 }
 
 int deliverBolusDosage(){
@@ -453,10 +472,15 @@ int factoryReset(){
 	return 0;
 }
 
-void recalculate_times(){
-    dosage_cycle = 3600/(Dosage_Rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
-    fill_time = (dosage_cycle - DISPENSE_TIME);	//total time to leave valve on dispense
-    flow_rate_changed = 0;
+int recalculate_times(){
+
+	if(flow_rate>0){
+		//dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
+		fill_time = ((3600/(flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
+	}
+	bolus_countdown = bolus_mins *60;
+	flow_rate_changed = 0;
+    return 0;
     
 }
 
@@ -490,7 +514,8 @@ __interrupt void    Port_1(void)
 
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer_A0 (void){
-    current_time++;
-    bolus_countdown_prev = bolus_countdown;
-    bolus_countdown--;
+    current_time = current_time +1;
+    if(bolus_countdown>0){
+    	bolus_countdown--;
+    }
 }
