@@ -69,8 +69,8 @@ const int MIN_FLOW_RATE = 0;		//minimum allowable primary flow rate (mL/hour)
 
 volatile size_t current_time = 0;
 volatile int next_valve_change = 0;
-volatile int bolus_countdown = DEFAULT_BOLUS_MINS * 60;
-volatile int bolus_countdown_prev = DEFAULT_BOLUS_MINS * 60;
+volatile int bolus_countdown = 0;
+volatile int bolus_countdown_prev = 0;
 
 //flags for changed state
 volatile int flow_rate_changed = 1;
@@ -448,10 +448,13 @@ int printBolusCountdown(){
     if (minutes_left>=10){
         minutes[0] = minutes_left%10 + '0';
         minutes[1] = minutes_left - (minutes_left%10)*10 + '0';
+        minutes[2] = '\0';
     }else{
         minutes[0]= minutes_left + '0';
+        minutes[1]='\0';
     }
-    char min[4] = " min";
+    char min[5] = " min";
+    min[4] = '\0';
     strcat(minutes,min);
     //char str[16];
     //sprintf(str, "%d min", minutes_left);
@@ -462,7 +465,8 @@ int printBolusCountdown(){
 }
 
 int deliverBolusDosage(){
-    //TODO
+    bolus_countdown = bolus_mins*60;
+    bolus_countdown_prev = bolus_mins;
     return 0;
 }
 
