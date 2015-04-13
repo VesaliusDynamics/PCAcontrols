@@ -118,7 +118,7 @@ void main (void){
     
     
     //setting up timer A0
-    TA0CCR0 = MCU_CLOCK/11;   //sets counter limit, should interrupt every .05sec
+    TA0CCR0 = 12000;   //sets counter limit, should interrupt every .05sec
     TA0CCTL0 = 0x10;       //enable timer interrupts
     TA0CTL = TASSEL_1 + MC_1;   //uses 12kHz clock as source for counting
     
