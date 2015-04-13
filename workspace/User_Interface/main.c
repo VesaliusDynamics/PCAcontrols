@@ -118,7 +118,7 @@ void main (void){
     
     
     //setting up timer A0
-    TA0CCR0 = MCU_CLOCK/20;   //sets counter limit, should interrupt every .05sec
+    TA0CCR0 = MCU_CLOCK/11;   //sets counter limit, should interrupt every .05sec
     TA0CCTL0 = 0x10;       //enable timer interrupts
     TA0CTL = TASSEL_1 + MC_1;   //uses 12kHz clock as source for counting
     
@@ -434,7 +434,7 @@ void main (void){
             }
             
         }
-        if(state==P_BOLUS_COUNTDOWN && (bolus_countdown%60)<bolus_countdown_prev){
+        if(state==P_BOLUS_COUNTDOWN && (bolus_countdown/60)<bolus_countdown_prev){
             printBolusCountdown();
         }
     }
@@ -442,12 +442,12 @@ void main (void){
 
 int printBolusCountdown(){
     
-    int minutes_left = bolus_countdown%60;
+    int minutes_left = bolus_countdown/60;
     bolus_countdown_prev = minutes_left;
     char minutes[16] = 0;
     if (minutes_left>=10){
-        minutes[0] = minutes_left%10 + '0';
-        minutes[1] = minutes_left - (minutes_left%10)*10 + '0';
+        minutes[0] = minutes_left/10 + '0';
+        minutes[1] = minutes_left%10 + '0';
         minutes[2] = '\0';
     }else{
         minutes[0]= minutes_left + '0';
@@ -521,7 +521,7 @@ __interrupt void    Port_1(void)
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer_A0 (void){
     timercount ++;
-    if (timercount == 20) {
+    if (timercount >= 20) {
         current_time = current_time +1;
         if(bolus_countdown>0){
             bolus_countdown--;
