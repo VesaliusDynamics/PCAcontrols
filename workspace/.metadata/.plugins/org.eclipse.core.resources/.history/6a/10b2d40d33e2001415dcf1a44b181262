@@ -465,7 +465,6 @@ int printBolusCountdown(){
 }
 
 int deliverBolusDosage(){
-	timercount = 0;
     bolus_countdown = bolus_mins*60;
     bolus_countdown_prev = bolus_mins;
     return 0;
@@ -522,7 +521,7 @@ __interrupt void    Port_1(void)
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer_A0 (void){
     timercount ++;
-    if (timercount >= 44) {
+    if (timercount >= 45) {
         current_time = current_time +1;
         if(bolus_countdown>0){
             bolus_countdown--;
