@@ -50,15 +50,15 @@ volatile    buttons button    =   NONE;		//push button
 volatile	int count	=	0;		//push button
 volatile    valveState valve = FILL;
 
-const float DEFAULT_BOLUS_DOSAGE = 0;
-const float DEFAULT_BOLUS_MINS = 60;
-const float DEFAULT_FLOW_RATE = 0;
+const int DEFAULT_BOLUS_DOSAGE = 0;
+const int DEFAULT_BOLUS_MINS = 60;
+const int DEFAULT_FLOW_RATE = 0;
 const float CAPSULE_VOLUME = 0.9;		//volume in mL of dosage capsule
 
 
-volatile float bolus_dosage = DEFAULT_BOLUS_DOSAGE;
-volatile float bolus_mins = DEFAULT_BOLUS_MINS;
-volatile float flow_rate = DEFAULT_FLOW_RATE;
+volatile float bolus_dosage = (float)DEFAULT_BOLUS_DOSAGE;
+volatile float bolus_mins = (float)DEFAULT_BOLUS_MINS;
+volatile float flow_rate = (float)DEFAULT_FLOW_RATE;
 volatile float total_delivered = 0;
 volatile int bolus_active = 0;
 
@@ -151,9 +151,7 @@ void main (void){
     
     
     screenState state = D_BOLUS_DOSAGE;
-    char str[16];
-    sprintf(str, "%d mL", bolus_dosage);
-    print_screen("Bolus dosage:", str);
+    printBolusDosage();
     TACCR1 = servo_lut[FILL_DEGREES];
     
     
@@ -166,29 +164,22 @@ void main (void){
                     if (bolus_dosage < MAX_BOLUS_DOSAGE){
                         bolus_dosage+=1;
                     }
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)bolus_dosage);
-                    print_screen("Bolus dosage:", str);
+                    printBolusDosage();
                 } else if (button==DOWN){
                     button = NONE;
                     if (bolus_dosage > 0){
                         bolus_dosage-=1;
                     }
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)bolus_dosage);
-                    print_screen("Bolus dosage:", str);
+                    printBolusDosage();
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();
+
                 } else if (button==BOLUS){
                     button = NONE;
                     state = D_BOLUS_TIME;
-                    str[0] = 0;
-                    sprintf(str, "%d minutes", (int)bolus_mins);
-                    print_screen("Bolus time:", str);
+                    printBolusMins();
                 }
                 
                 break;
@@ -201,10 +192,7 @@ void main (void){
                     } else {
                         bolus_mins = MAX_BOLUS_MINS;
                     }
-                    bolus_countdown = bolus_mins*60;
-                    str[0] = 0;
-                    sprintf(str, "%d minutes", (int)bolus_mins);
-                    print_screen("Bolus time:", str);
+                    printBolusMins();
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -213,24 +201,17 @@ void main (void){
                     } else {
                         bolus_mins = MINIMUM_BOLUS_MINS;
                     }
-                    bolus_countdown = bolus_mins*60;
-                    str[0] = 0;
-                    sprintf(str, "%d minutes", (int)bolus_mins);
-                    print_screen("Bolus time:", str);
+                    printBolusMins();
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();d
                     
                 } else if (button==BOLUS){
                     button = NONE;
                     state = D_FLOW_RATE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();
                     
                 }
                 
@@ -245,9 +226,7 @@ void main (void){
                         flow_rate = MAX_FLOW_RATE;
                     }
                     flow_rate_changed = 1;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -257,16 +236,12 @@ void main (void){
                         flow_rate = MIN_FLOW_RATE;
                     }
                     flow_rate_changed = 1;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -287,9 +262,7 @@ void main (void){
                 } else if (button==UP || button==DOWN || button==BOLUS){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)bolus_dosage);
-                    print_screen("Bolus dosage:", str);
+                    printBolusDosage();
                 }
                 
                 break;
@@ -298,9 +271,7 @@ void main (void){
                 if(button!=NONE){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)bolus_dosage);
-                    print_screen("Bolus dosage:", str);
+                    printBolusDosage();
                 }
                 
                 break;
@@ -309,9 +280,7 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)total_delivered);
-                    print_screen("Total delivered:", str);
+                    printTotalDelivered();
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -321,9 +290,7 @@ void main (void){
                 } else if (button==RESET){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)bolus_dosage);
-                    print_screen("Bolus dosage:", str);
+                    printBolusDosage();
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -339,24 +306,18 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();
                     
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)total_delivered);
-                    print_screen("Total delivered:", str);
+                    printTotalDelivered();
                     
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)bolus_dosage);
-                    print_screen("Bolus dosage:", str);
+                    printBolusDosage();
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -377,16 +338,12 @@ void main (void){
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL/hour", (int)flow_rate);
-                    print_screen("Flow rate:", str);
+                    printFlowRate();
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    str[0] = 0;
-                    sprintf(str, "%d mL", (int)bolus_dosage);
-                    print_screen("Bolus dosage:", str);
+                    printBolusDosage();
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -452,6 +409,35 @@ void main (void){
         }
     }
 }
+
+int printFlowRate(){
+    char str[16];
+    sprintf(str, "%d mL/hour", (int)flow_rate);
+    print_screen("Flow rate:", str);
+    return 0;
+}
+
+int printBolusDosage(){
+    char str[16];
+    sprintf(str, "%d mL", (int)bolus_dosage);
+    print_screen("Bolus dosage:", str);
+    return 0;
+}
+
+int printBolusMins(){
+    char str[16];
+    sprintf(str, "%d mL", (int)bolus_mins);
+    print_screen("Bolus time:", str);
+    return 0;
+}
+
+int printTotalDelivered(){
+    char str[16];
+    sprintf(str, "%d mL", (int)total_delivered);
+    print_screen("Total delivered:", str);
+    return 0;
+}
+
 
 int printBolusCountdown(){
     
