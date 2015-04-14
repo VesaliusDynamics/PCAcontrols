@@ -54,7 +54,7 @@ typedef enum {
 } printerType;
 
 //forward declaration
-int print(printerType, double);
+int print(printerType, int);
 
 
 volatile    buttons button    =   NONE;		//push button
@@ -67,17 +67,17 @@ const int DEFAULT_FLOW_RATE = 0;
 const float CAPSULE_VOLUME = 0.9;		//volume in mL of dosage capsule
 
 
-volatile float bolus_dosage = (float)DEFAULT_BOLUS_DOSAGE;
-volatile float bolus_mins = (float)DEFAULT_BOLUS_MINS;
-volatile float flow_rate = (float)DEFAULT_FLOW_RATE;
+volatile int bolus_dosage = (float)DEFAULT_BOLUS_DOSAGE;
+volatile int bolus_mins = (float)DEFAULT_BOLUS_MINS;
+volatile int flow_rate = (float)DEFAULT_FLOW_RATE;
 volatile float total_delivered = 0;
 volatile int bolus_active = 0;
 
-const float MAX_BOLUS_DOSAGE = 100; 	//maximum allowable bolus dosage (in mL)
-const float MAX_BOLUS_MINS = 480;		//maximum allowable minutes between bolus dosages
-const float MINIMUM_BOLUS_MINS = 10;	//minimum amount of time between bolus dosages
-const float MAX_FLOW_RATE = 20;		//maximum allowable primary flow rate (mL/hour)
-const float MIN_FLOW_RATE = 0;		//minimum allowable primary flow rate (mL/hour)
+const int MAX_BOLUS_DOSAGE = 100; 	//maximum allowable bolus dosage (in mL)
+const int MAX_BOLUS_MINS = 480;		//maximum allowable minutes between bolus dosages
+const int MINIMUM_BOLUS_MINS = 10;	//minimum amount of time between bolus dosages
+const int MAX_FLOW_RATE = 20;		//maximum allowable primary flow rate (mL/hour)
+const int MIN_FLOW_RATE = 0;		//minimum allowable primary flow rate (mL/hour)
 
 volatile int current_time = 0;
 volatile int next_valve_change = 0;
@@ -87,8 +87,8 @@ volatile int bolus_countdown_prev = 0;
 //flags for changed state
 volatile int flow_rate_changed = 1;
 volatile int bolus_dosage_changed = 0;
-volatile double dosage_cycle = 0;
-volatile double fill_time = 0;
+volatile int dosage_cycle = 0;
+volatile int fill_time = 0;
 
 volatile int timercount = 0;
 volatile int max_bolus_count = 0;
@@ -295,7 +295,8 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    print(TD,total_delivered);
+                    int y = int(total_delivered+0.5);
+                    print(TD,y);
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -326,7 +327,8 @@ void main (void){
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    print(TD,total_delivered);
+                    int y = int(total_delivered+0.5);
+                    print(TD,y);
                     
                     
                 } else if (button==RESET){
@@ -399,7 +401,8 @@ void main (void){
                         TACCR1 = servo_lut[FILL_DEGREES];
                         total_delivered += CAPSULE_VOLUME;
                         if (state == P_TOTAL_DELIVERED) {
-                            print(TD,total_delivered);
+                            int y = int(total_delivered+0.5);
+                            print(TD,y);
                         }
                         if (bolus_active) {
                             next_valve_change = current_time +MIN_FILL_TIME;
@@ -428,10 +431,9 @@ void main (void){
     }
 }
 
-int print(printerType x, double val){
+int print(printerType x, int val){
     
     char str[16];
-    int y = (int)(val+0.5);
     
     switch (x) {
        
@@ -545,10 +547,10 @@ int recalculate_times(){
     
     if(flow_rate>0){
         //dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
-        fill_time = ((3600/(flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
+        fill_time = (int)((3600/((double)flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME+0.5);	//total time to leave valve on fill
     }
     if (bolus_dosage > 0) {
-        max_bolus_count = (bolus_dosage/CAPSULE_VOLUME)*(1+(MIN_FILL_TIME+DISPENSE_TIME)/(3600/(flow_rate/CAPSULE_VOLUME)));
+        max_bolus_count = (int)((double)bolus_dosage/CAPSULE_VOLUME)*(1.+((double)MIN_FILL_TIME+DISPENSE_TIME)/(3600./((double)flow_rate/CAPSULE_VOLUME))+0.5);
     }
     bolus_countdown = 0;
     bolus_active = 0;
