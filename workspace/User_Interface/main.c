@@ -53,8 +53,14 @@ typedef enum {
     TOTAL_DELIVERED
 } printerType;
 
-//forward declaration
-int print(printerType, double);
+//forward declarations----------
+int print(printerType, int);
+int printBolusCountdown();
+int deliverBolusDosage();
+int factoryReset();
+int recalculate_times();
+
+//------------------------------
 
 
 volatile    buttons button    =   NONE;		//push button
@@ -66,22 +72,21 @@ const int DEFAULT_BOLUS_MINS = 60;
 const int DEFAULT_FLOW_RATE = 0;
 const float CAPSULE_VOLUME = 0.9;		//volume in mL of dosage capsule
 
-
-volatile float bolus_dosage = (float)DEFAULT_BOLUS_DOSAGE;
-volatile float bolus_mins = (float)DEFAULT_BOLUS_MINS;
-volatile float flow_rate = (float)DEFAULT_FLOW_RATE;
-volatile float total_delivered = 0;
+int bolus_dosage = DEFAULT_BOLUS_DOSAGE;
+int bolus_mins = DEFAULT_BOLUS_MINS;
+int flow_rate = DEFAULT_FLOW_RATE;
+volatile int total_delivered = 0;
 volatile int bolus_active = 0;
 
-const float MAX_BOLUS_DOSAGE = 100; 	//maximum allowable bolus dosage (in mL)
-const float MAX_BOLUS_MINS = 480;		//maximum allowable minutes between bolus dosages
-const float MINIMUM_BOLUS_MINS = 10;	//minimum amount of time between bolus dosages
-const float MAX_FLOW_RATE = 20;		//maximum allowable primary flow rate (mL/hour)
-const float MIN_FLOW_RATE = 0;		//minimum allowable primary flow rate (mL/hour)
+const int MAX_BOLUS_DOSAGE = 100; 	//maximum allowable bolus dosage (in mL)
+const int MAX_BOLUS_MINS = 480;		//maximum allowable minutes between bolus dosages
+const int MINIMUM_BOLUS_MINS = 10;	//minimum amount of time between bolus dosages
+const int MAX_FLOW_RATE = 20;		//maximum allowable primary flow rate (mL/hour)
+const int MIN_FLOW_RATE = 0;		//minimum allowable primary flow rate (mL/hour)
 
 volatile int current_time = 0;
 volatile int next_valve_change = 0;
-volatile int bolus_countdown = 0;
+volatile int bolus_countdown = 0;		//The number of seconds until the patient can administer the bolus dosage again
 volatile int bolus_countdown_prev = 0;
 
 //flags for changed state
@@ -94,10 +99,83 @@ volatile int timercount = 0;
 volatile int max_bolus_count = 0;
 volatile int bolus_count = 0;
 
+/* reverse:  reverse string s in place */
+void reverse(char s[])
+{
+    int i, j;
+    char c;
+
+    for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+        c = s[i];
+        s[i] = s[j];
+        s[j] = c;
+    }
+}
+/* itoa:  convert n to characters in s */
+void itoa(int x, char s[])
+{
+    int i, sign;
+    int n = x;
+
+    if ((sign = n) < 0)  /* record sign */
+        n = -n;          /* make n positive */
+    i = 0;
+    do {       /* generate digits in reverse order */
+        s[i++] = n % 10 + '0';   /* get next digit */
+    } while ((n /= 10) > 0);     /* delete it */
+    if (sign < 0)
+        s[i++] = '-';
+    s[i] = '\0';
+    reverse(s);
+}
+
+int print(printerType x, int val){
+
+    char num[4];
+    char str[16];
+
+    switch (x) {
+
+
+        case BOLUS_MINS:
+            itoa(val, num);
+            strcpy(str, num);
+            strcat(str, " minutes");
+            print_screen("Bolus time:", str);
+            break;
+
+        case BOLUS_DOSAGE:
+            itoa(val, num);
+            strcpy(str, num);
+            strcat(str, " mL");
+            print_screen("Bolus dosage:", str);
+            break;
+
+        case FLOW_RATE:
+            itoa(val, num);
+            strcpy(str, num);
+            strcat(str, " mL/hr");
+            print_screen("Flow rate:", str);
+            break;
+
+        case TOTAL_DELIVERED:
+            itoa(val, num);
+            strcpy(str, num);
+            strcat(str, " mL");
+            print_screen("Total delivered:", str);
+            break;
+
+        default:
+            break;
+    }
+
+    return 0;
+}
+
 void main (void){
     
     WDTCTL = WDTPW + WDTHOLD; // stop watchdog timer
-    
+
     //push button code
     {
         //setting P1.4
@@ -177,7 +255,7 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     if (bolus_dosage < MAX_BOLUS_DOSAGE){
-                        bolus_dosage+=1;
+                        bolus_dosage++;
                     }
                     print(BD, bolus_dosage);
                 } else if (button==DOWN){
@@ -428,53 +506,11 @@ void main (void){
     }
 }
 
-int print(printerType x, double val){
-    
-    char str[16];
-    int y = (int)(val+0.5);
-    
-    switch (x) {
-       
-            
-        case BOLUS_MINS:
-            sprintf(str, "%d mL", y);
-            print_screen("Bolus time:", str);
-            break;
-            
-        case BOLUS_DOSAGE:
-            sprintf(str, "%d mL", y);
-            print_screen("Bolus dosage:", str);
-            break;
-            
-        case FLOW_RATE:
-            sprintf(str, "%d mL/hour", y);
-            print_screen("Flow rate:", str);
-            break;
-            
-        case TOTAL_DELIVERED:
-            sprintf(str, "%d mL", y);
-            print_screen("Total delivered:", str);
-            break;
-            
-        default:
-            break;
-    }
-    
-    return 0;
-}
-
 /*
 int printFlowRate(){
     char str[16];
     sprintf(str, "%d mL/hour", (int)flow_rate);
     print_screen("Flow rate:", str);
-    return 0;
-}
-
-int printBolusDosage(){
-    char str[16];
-    sprintf(str, "%d mL", (int)bolus_dosage);
-    print_screen("Bolus dosage:", str);
     return 0;
 }
 
@@ -491,8 +527,8 @@ int printTotalDelivered(){
     print_screen("Total delivered:", str);
     return 0;
 }
-
 */
+
 int printBolusCountdown(){
     
     int minutes_left = bolus_countdown/60;
@@ -545,7 +581,7 @@ int recalculate_times(){
     
     if(flow_rate>0){
         //dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
-        fill_time = ((3600/(flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
+        fill_time = ((3600.0/(flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
     }
     if (bolus_dosage > 0) {
         max_bolus_count = (bolus_dosage/CAPSULE_VOLUME)*(1+(MIN_FILL_TIME+DISPENSE_TIME)/(3600/(flow_rate/CAPSULE_VOLUME)));
@@ -585,9 +621,10 @@ __interrupt void    Port_1(void)
     }
 }
 
+
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer_A0 (void){
-    timercount ++;
+    timercount++;
     if (timercount >= 44) {
         current_time = current_time +1;
         if(bolus_countdown>0){
@@ -595,5 +632,4 @@ __interrupt void Timer_A0 (void){
         }
         timercount = 0;
     }
-    
 }

@@ -13,16 +13,16 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="" key="selection"/>
+		<item value="TOTAL_DELIVERED" key="selection"/>
 		<list key="findhistory">
+			<item value="total_delivered"/>
+			<item value="bolus_countdown"/>
+			<item value="delivered"/>
+			<item value="bolus_dosage"/>
 			<item value="%60"/>
 			<item value="current_time"/>
-			<item value="bolus_countdown"/>
 			<item value="flow_Rate"/>
 			<item value="dosage_cycle"/>
-			<item value="capsule_volume"/>
-			<item value="recalculate"/>
-			<item value="recalculate_times"/>
 		</list>
 		<list key="replacehistory">
 		</list>
