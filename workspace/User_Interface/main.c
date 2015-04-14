@@ -16,6 +16,7 @@
 #define DISPENSE_DEGREES	135		//Servo position to dispense dosage capsule
 
 #define DISPENSE_TIME       60     //time to dispense dosage capsule
+#define MIN_FILL_TIME       30     //minimum time to fill dosage capsule
 
 unsigned int PWM_Period     = (MCU_CLOCK / PWM_FREQUENCY);  // PWM Period
 unsigned int PWM_Duty       = 0;                            // %
@@ -79,6 +80,8 @@ volatile double dosage_cycle = 0;
 volatile double fill_time = 0;
 
 volatile int timercount = 0;
+volatile int max_bolus_count = 0;
+volatile int bolus_count = 0;
 
 void main (void){
     
@@ -118,7 +121,7 @@ void main (void){
     
     
     //setting up timer A0
-    TA0CCR0 = 12000;   //sets counter limit, should interrupt every .05sec
+    TA0CCR0 = 12000d;   //sets counter limit, should interrupt every .05sec
     TA0CCTL0 = 0x10;       //enable timer interrupts
     TA0CTL = TASSEL_1 + MC_1;   //uses 12kHz clock as source for counting
     
@@ -422,7 +425,16 @@ void main (void){
                     if (current_time >= next_valve_change) {
                         TACCR1 = servo_lut[FILL_DEGREES];
                         total_delivered += CAPSULE_VOLUME;
-                        next_valve_change = current_time + fill_time;
+                        if (bolus_active) {
+                            next_valve_change = current_time +MIN_FILL_TIME;
+                            bolus_count++;
+                            if (bolus_count>=max_bolus_count) {
+                                bolus_count = 0;
+                                bolus_active = 0;
+                            }
+                        }else{
+                            next_valve_change = current_time + fill_time;
+                        }
                         valve = FILL;
                     }
                     
@@ -465,9 +477,14 @@ int printBolusCountdown(){
 }
 
 int deliverBolusDosage(){
-	timercount = 0;
-    bolus_countdown = bolus_mins*60;
-    bolus_countdown_prev = bolus_mins;
+    if (bolus_active == 0 && bolus_countdown == 0) {
+        bolus_active = 1;
+        bolus_countdown = bolus_mins*60;
+        bolus_countdown_prev = bolus_mins;
+    }else{
+        //do nothing
+    }
+    
     return 0;
 }
 
@@ -484,6 +501,9 @@ int recalculate_times(){
     if(flow_rate>0){
         //dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
         fill_time = ((3600/(flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
+    }
+    if (bolus_dosage > 0) {
+        max_bolus_count = (bolus_dosage/CAPSULE_VOLUME)*(1+(MIN_FILL_TIME+DISPENSE_TIME)/(3600/(flow_rate/CAPSULE_VOLUME)))
     }
     bolus_countdown = bolus_mins *60;
     flow_rate_changed = 0;
