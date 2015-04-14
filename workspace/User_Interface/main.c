@@ -167,7 +167,7 @@ void main (void){
                         bolus_dosage+=1;
                     }
                     str[0] = 0;
-                    sprintf(str, "%3f mL", bolus_dosage);
+                    sprintf(str, "%.2g mL", bolus_dosage);
                     print_screen("Bolus dosage:", str);
                 } else if (button==DOWN){
                     button = NONE;
@@ -175,19 +175,19 @@ void main (void){
                         bolus_dosage-=1;
                     }
                     str[0] = 0;
-                    sprintf(str, "%3f mL", bolus_dosage);
+                    sprintf(str, "%.2g mL", bolus_dosage);
                     print_screen("Bolus dosage:", str);
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL/hour", flow_rate);
+                    sprintf(str, "%.2g mL/hour", flow_rate);
                     print_screen("Flow rate:", str);
                 } else if (button==BOLUS){
                     button = NONE;
                     state = D_BOLUS_TIME;
                     str[0] = 0;
-                    sprintf(str, "%3f minutes", bolus_mins);
+                    sprintf(str, "%.2g minutes", bolus_mins);
                     print_screen("Bolus time:", str);
                 }
                 
@@ -203,7 +203,7 @@ void main (void){
                     }
                     bolus_countdown = bolus_mins*60;
                     str[0] = 0;
-                    sprintf(str, "%3f minutes", bolus_mins);
+                    sprintf(str, "%.2g minutes", bolus_mins);
                     print_screen("Bolus time:", str);
                     
                 } else if (button==DOWN){
@@ -215,7 +215,7 @@ void main (void){
                     }
                     bolus_countdown = bolus_mins*60;
                     str[0] = 0;
-                    sprintf(str, "%3f minutes", bolus_mins);
+                    sprintf(str, "%.2g minutes", bolus_mins);
                     print_screen("Bolus time:", str);
                     
                 } else if (button==RESET){
@@ -229,7 +229,7 @@ void main (void){
                     button = NONE;
                     state = D_FLOW_RATE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL/hour", flow_rate);
+                    sprintf(str, "%.2g mL/hour", flow_rate);
                     print_screen("Flow rate:", str);
                     
                 }
@@ -246,7 +246,7 @@ void main (void){
                     }
                     flow_rate_changed = 1;
                     str[0] = 0;
-                    sprintf(str, "%3f mL/hour", flow_rate);
+                    sprintf(str, "%.2g mL/hour", flow_rate);
                     print_screen("Flow rate:", str);
                     
                 } else if (button==DOWN){
@@ -258,14 +258,14 @@ void main (void){
                     }
                     flow_rate_changed = 1;
                     str[0] = 0;
-                    sprintf(str, "%3f mL/hour", flow_rate);
+                    sprintf(str, "%.2g mL/hour", flow_rate);
                     print_screen("Flow rate:", str);
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL/hour", flow_rate);
+                    sprintf(str, "%.2g mL/hour", flow_rate);
                     print_screen("Flow rate:", str);
                     
                 } else if (button==BOLUS){
@@ -288,7 +288,7 @@ void main (void){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL", bolus_dosage);
+                    sprintf(str, "%.2g mL", bolus_dosage);
                     print_screen("Bolus dosage:", str);
                 }
                 
@@ -299,7 +299,7 @@ void main (void){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL", bolus_dosage);
+                    sprintf(str, "%.2g mL", bolus_dosage);
                     print_screen("Bolus dosage:", str);
                 }
                 
@@ -310,7 +310,7 @@ void main (void){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
                     str[0] = 0;
-                    sprintf(str, "%3f mL", total_delivered);
+                    sprintf(str, "%.2g mL", total_delivered);
                     print_screen("Total delivered:", str);
                     
                 } else if (button==DOWN){
@@ -322,7 +322,7 @@ void main (void){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL", bolus_dosage);
+                    sprintf(str, "%.2g mL", bolus_dosage);
                     print_screen("Bolus dosage:", str);
                     
                 } else if (button==BOLUS){
@@ -340,14 +340,14 @@ void main (void){
                     button = NONE;
                     state = P_FLOW_RATE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL/hour", flow_rate);
+                    sprintf(str, "%.2g mL/hour", flow_rate);
                     print_screen("Flow rate:", str);
                     
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
                     str[0] = 0;
-                    sprintf(str, "%3f mL", total_delivered);
+                    sprintf(str, "%.2g mL", total_delivered);
                     print_screen("Total delivered:", str);
                     
                     
@@ -355,7 +355,7 @@ void main (void){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL", bolus_dosage);
+                    sprintf(str, "%.2g mL", bolus_dosage);
                     print_screen("Bolus dosage:", str);
                     
                 } else if (button==BOLUS){
@@ -378,14 +378,14 @@ void main (void){
                     button = NONE;
                     state = P_FLOW_RATE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL/hour", flow_rate);
+                    sprintf(str, "%.2g mL/hour", flow_rate);
                     print_screen("Flow rate:", str);
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
                     str[0] = 0;
-                    sprintf(str, "%3f mL", bolus_dosage);
+                    sprintf(str, "%.2g mL", bolus_dosage);
                     print_screen("Bolus dosage:", str);
                     
                 } else if (button==BOLUS){
@@ -447,7 +447,7 @@ void main (void){
             }
             
         }
-        if(state==P_BOLUS_COUNTDOWN && (bolus_countdown/60)<bolus_countdown_prev){
+        if(state==P_BOLUS_COUNTDOWN && (bolus_countdown/60)<bolus_countdown_prev ){
             printBolusCountdown();
         }
     }
@@ -456,7 +456,11 @@ void main (void){
 int printBolusCountdown(){
     
     int minutes_left = bolus_countdown/60;
+    if (bolus_countdown<60 && bolus_countdown>0) {
+        minutes_left = 1;
+    }
     bolus_countdown_prev = minutes_left;
+    
     char minutes[16] = 0;
     if (minutes_left>=10){
         minutes[0] = minutes_left/10 + '0';
@@ -504,7 +508,7 @@ int recalculate_times(){
         fill_time = ((3600/(flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
     }
     if (bolus_dosage > 0) {
-        max_bolus_count = (bolus_dosage/CAPSULE_VOLUME)*(1+(MIN_FILL_TIME+DISPENSE_TIME)/(3600/(flow_rate/CAPSULE_VOLUME)))
+        max_bolus_count = (bolus_dosage/CAPSULE_VOLUME)*(1+(MIN_FILL_TIME+DISPENSE_TIME)/(3600/(flow_rate/CAPSULE_VOLUME)));
     }
     bolus_countdown = 0;
     bolus_active = 0;
