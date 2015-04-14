@@ -3,18 +3,19 @@
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="353" key="DIALOG_WIDTH"/>
 		<item value="173" key="DIALOG_Y_ORIGIN"/>
-		<item value="513" key="DIALOG_HEIGHT"/>
 		<item value="1245" key="DIALOG_X_ORIGIN"/>
+		<item value="513" key="DIALOG_HEIGHT"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-18|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
-		<item value="false" key="isRegEx"/>
 		<item value="true" key="casesensitive"/>
+		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="total_delivered" key="selection"/>
+		<item value="FILL_DEGREES" key="selection"/>
 		<list key="findhistory">
+			<item value="FILL_DEGREES"/>
 			<item value="total_delivered"/>
 			<item value="valve"/>
 			<item value="recal"/>
@@ -22,7 +23,6 @@
 			<item value="FR,flow"/>
 			<item value="FR, flow"/>
 			<item value="flow_rate"/>
-			<item value="my_flow_rate"/>
 		</list>
 		<list key="replacehistory">
 			<item value="my_flow_rate"/>
