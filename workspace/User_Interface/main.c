@@ -46,6 +46,17 @@ typedef enum {
     DISPENSE
 } valveState;
 
+typedef enum {
+    BOLUS_MINS,
+    BOLUS_DOSAGE,
+    FLOW_RATE,
+    TOTAL_DELIVERED
+} printerType;
+
+//forward declaration
+int print(printerType, double);
+
+
 volatile    buttons button    =   NONE;		//push button
 volatile	int count	=	0;		//push button
 volatile    valveState valve = FILL;
@@ -148,10 +159,14 @@ void main (void){
     P1SEL   |= BIT2;               // P1.2 = TA1 output
     __enable_interrupt();  //  Enable  Global  Interrupts
     
-    
+    //making printers
+    printerType BM = BOLUS_MINS;
+    printerType BD = BOLUS_DOSAGE;
+    printerType FR = FLOW_RATE;
+    printerType TD = TOTAL_DELIVERED;
     
     screenState state = D_BOLUS_DOSAGE;
-    printBolusDosage();
+    print(BD, bolus_dosage);
     TACCR1 = servo_lut[FILL_DEGREES];
     
     
@@ -164,22 +179,22 @@ void main (void){
                     if (bolus_dosage < MAX_BOLUS_DOSAGE){
                         bolus_dosage+=1;
                     }
-                    printBolusDosage();
+                    print(BD, bolus_dosage);
                 } else if (button==DOWN){
                     button = NONE;
                     if (bolus_dosage > 0){
                         bolus_dosage-=1;
                     }
-                    printBolusDosage();
+                    print(BD, bolus_dosage);
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    printFlowRate();
+                    print(FR,flow_rate);
 
                 } else if (button==BOLUS){
                     button = NONE;
                     state = D_BOLUS_TIME;
-                    printBolusMins();
+                    print(BM,bolus_mins);
                 }
                 
                 break;
@@ -192,7 +207,7 @@ void main (void){
                     } else {
                         bolus_mins = MAX_BOLUS_MINS;
                     }
-                    printBolusMins();
+                    print(BM,bolus_mins);
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -201,17 +216,17 @@ void main (void){
                     } else {
                         bolus_mins = MINIMUM_BOLUS_MINS;
                     }
-                    printBolusMins();
+                    print(BM,bolus_mins);
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    printFlowRate();d
+                    print(FR,flow_rate);
                     
                 } else if (button==BOLUS){
                     button = NONE;
                     state = D_FLOW_RATE;
-                    printFlowRate();
+                    print(FR,flow_rate);
                     
                 }
                 
@@ -226,7 +241,7 @@ void main (void){
                         flow_rate = MAX_FLOW_RATE;
                     }
                     flow_rate_changed = 1;
-                    printFlowRate();
+                    print(FR,flow_rate);
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -236,12 +251,12 @@ void main (void){
                         flow_rate = MIN_FLOW_RATE;
                     }
                     flow_rate_changed = 1;
-                    printFlowRate();
+                    print(FR,flow_rate);
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    printFlowRate();
+                    print(FR,flow_rate);
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -262,7 +277,7 @@ void main (void){
                 } else if (button==UP || button==DOWN || button==BOLUS){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    printBolusDosage();
+                    print(BD, bolus_dosage);
                 }
                 
                 break;
@@ -271,7 +286,7 @@ void main (void){
                 if(button!=NONE){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    printBolusDosage();
+                    print(BD, bolus_dosage);
                 }
                 
                 break;
@@ -280,7 +295,7 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    printTotalDelivered();
+                    print(TD,total_delivered);
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -290,7 +305,7 @@ void main (void){
                 } else if (button==RESET){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    printBolusDosage();
+                    print(BD, bolus_dosage);
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -306,18 +321,18 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    printFlowRate();
+                    print(FR,flow_rate);
                     
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    printTotalDelivered();
+                    print(TD,total_delivered);
                     
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    printBolusDosage();
+                    print(BD, bolus_dosage);
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -338,12 +353,12 @@ void main (void){
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_FLOW_RATE;
-                    printFlowRate();
+                    print(FR,flow_rate);
                     
                 } else if (button==RESET){
                     button = NONE;
                     state = D_BOLUS_DOSAGE;
-                    printBolusDosage();
+                    print(BD, bolus_dosage);
                     
                 } else if (button==BOLUS){
                     button = NONE;
@@ -383,6 +398,9 @@ void main (void){
                     if (current_time >= next_valve_change) {
                         TACCR1 = servo_lut[FILL_DEGREES];
                         total_delivered += CAPSULE_VOLUME;
+                        if (state == P_TOTAL_DELIVERED) {
+                            print(TD,total_delivered);
+                        }
                         if (bolus_active) {
                             next_valve_change = current_time +MIN_FILL_TIME;
                             bolus_count++;
@@ -410,6 +428,42 @@ void main (void){
     }
 }
 
+int print(printerType x, double val){
+    
+    char str[16];
+    int y = (int)(val+0.5);
+    
+    switch (x) {
+       
+            
+        case BOLUS_MINS:
+            sprintf(str, "%d mL", y);
+            print_screen("Bolus time:", str);
+            break;
+            
+        case BOLUS_DOSAGE:
+            sprintf(str, "%d mL", y);
+            print_screen("Bolus dosage:", str);
+            break;
+            
+        case FLOW_RATE:
+            sprintf(str, "%d mL/hour", y);
+            print_screen("Flow rate:", str);
+            break;
+            
+        case TOTAL_DELIVERED:
+            sprintf(str, "%d mL", y);
+            print_screen("Total delivered:", str);
+            break;
+            
+        default:
+            break;
+    }
+    
+    return 0;
+}
+
+/*
 int printFlowRate(){
     char str[16];
     sprintf(str, "%d mL/hour", (int)flow_rate);
@@ -438,7 +492,7 @@ int printTotalDelivered(){
     return 0;
 }
 
-
+*/
 int printBolusCountdown(){
     
     int minutes_left = bolus_countdown/60;
