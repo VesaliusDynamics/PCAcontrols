@@ -53,6 +53,7 @@ typedef enum {
     TOTAL_DELIVERED
 } printerType;
 
+
 //forward declarations----------
 int print(printerType, int);
 int printBolusCountdown();
@@ -61,6 +62,7 @@ int factoryReset();
 int recalculate_times();
 
 //------------------------------
+
 
 
 volatile    buttons button    =   NONE;		//push button
@@ -75,7 +77,8 @@ const float CAPSULE_VOLUME = 0.9;		//volume in mL of dosage capsule
 int bolus_dosage = DEFAULT_BOLUS_DOSAGE;
 int bolus_mins = DEFAULT_BOLUS_MINS;
 int flow_rate = DEFAULT_FLOW_RATE;
-volatile int total_delivered = 0;
+volatile float total_delivered = 0;
+
 volatile int bolus_active = 0;
 
 const int MAX_BOLUS_DOSAGE = 100; 	//maximum allowable bolus dosage (in mL)
@@ -92,8 +95,8 @@ volatile int bolus_countdown_prev = 0;
 //flags for changed state
 volatile int flow_rate_changed = 1;
 volatile int bolus_dosage_changed = 0;
-volatile double dosage_cycle = 0;
-volatile double fill_time = 0;
+volatile int dosage_cycle = 0;
+volatile int fill_time = 0;
 
 volatile int timercount = 0;
 volatile int max_bolus_count = 0;
@@ -373,7 +376,8 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    print(TD,total_delivered);
+                    int y = int(total_delivered+0.5);
+                    print(TD,y);
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -404,7 +408,8 @@ void main (void){
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    print(TD,total_delivered);
+                    int y = int(total_delivered+0.5);
+                    print(TD,y);
                     
                     
                 } else if (button==RESET){
@@ -477,7 +482,8 @@ void main (void){
                         TACCR1 = servo_lut[FILL_DEGREES];
                         total_delivered += CAPSULE_VOLUME;
                         if (state == P_TOTAL_DELIVERED) {
-                            print(TD,total_delivered);
+                            int y = int(total_delivered+0.5);
+                            print(TD,y);
                         }
                         if (bolus_active) {
                             next_valve_change = current_time +MIN_FILL_TIME;
@@ -581,10 +587,10 @@ int recalculate_times(){
     
     if(flow_rate>0){
         //dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
-        fill_time = ((3600.0/(flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
+        fill_time = (int)((3600/((double)flow_rate/CAPSULE_VOLUME)) - DISPENSE_TIME+0.5);	//total time to leave valve on fill
     }
     if (bolus_dosage > 0) {
-        max_bolus_count = (bolus_dosage/CAPSULE_VOLUME)*(1+(MIN_FILL_TIME+DISPENSE_TIME)/(3600/(flow_rate/CAPSULE_VOLUME)));
+        max_bolus_count = (int)((double)bolus_dosage/CAPSULE_VOLUME)*(1.+((double)MIN_FILL_TIME+DISPENSE_TIME)/(3600./((double)flow_rate/CAPSULE_VOLUME))+0.5);
     }
     bolus_countdown = 0;
     bolus_active = 0;
