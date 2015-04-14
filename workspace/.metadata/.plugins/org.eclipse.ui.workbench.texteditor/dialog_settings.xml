@@ -2,29 +2,30 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="353" key="DIALOG_WIDTH"/>
-		<item value="159" key="DIALOG_Y_ORIGIN"/>
-		<item value="1204" key="DIALOG_X_ORIGIN"/>
+		<item value="162" key="DIALOG_Y_ORIGIN"/>
+		<item value="1006" key="DIALOG_X_ORIGIN"/>
 		<item value="513" key="DIALOG_HEIGHT"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-18|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
-		<item value="false" key="casesensitive"/>
+		<item value="true" key="casesensitive"/>
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="TOTAL_DELIVERED" key="selection"/>
+		<item value="recal" key="selection"/>
 		<list key="findhistory">
-			<item value="total_delivered"/>
-			<item value="bolus_countdown"/>
-			<item value="delivered"/>
-			<item value="bolus_dosage"/>
-			<item value="%60"/>
-			<item value="current_time"/>
-			<item value="flow_Rate"/>
-			<item value="dosage_cycle"/>
+			<item value="recal"/>
+			<item value="recalculate"/>
+			<item value="FR,flow"/>
+			<item value="FR, flow"/>
+			<item value="flow_rate"/>
+			<item value="my_flow_rate"/>
+			<item value="recalculate_times"/>
+			<item value="timercount"/>
 		</list>
 		<list key="replacehistory">
+			<item value="my_flow_rate"/>
 		</list>
 	</section>
 </section>
