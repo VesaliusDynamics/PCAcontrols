@@ -75,7 +75,7 @@ const float CAPSULE_VOLUME = 0.9;		//volume in mL of dosage capsule
 int bolus_dosage = DEFAULT_BOLUS_DOSAGE;
 int bolus_mins = DEFAULT_BOLUS_MINS;
 int flow_rate = DEFAULT_FLOW_RATE;
-volatile int total_delivered = 0;
+volatile float total_delivered = 0;
 
 volatile int bolus_active = 0;
 
@@ -115,6 +115,7 @@ void reverse(char s[])
 /* itoa:  convert n to characters in s */
 void itoa(int x, char s[])
 {
+	//http://stackoverflow.com/questions/190229/where-is-the-itoa-function-in-linux
     int i, sign;
     int n = x;
 
@@ -374,9 +375,9 @@ void main (void){
                 if (button==UP){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    //int y = int(total_delivered+0.5);
-                    //print(TD,y);
-                    print(TD, total_delivered);
+                    int y = (int)(total_delivered+0.5);
+                    print(TD,y);
+                    //print(TD, total_delivered);
                     
                 } else if (button==DOWN){
                     button = NONE;
@@ -407,9 +408,9 @@ void main (void){
                 } else if (button==DOWN){
                     button = NONE;
                     state = P_TOTAL_DELIVERED;
-                    //int y = int(total_delivered+0.5);
-                    //print(TD,y);
-                    print(TD, total_delivered);
+                    int y = (int)(total_delivered+0.5);
+                    print(TD,y);
+                    //print(TD, total_delivered);
                     
                     
                 } else if (button==RESET){
@@ -482,9 +483,9 @@ void main (void){
                         TACCR1 = servo_lut[FILL_DEGREES];
                         total_delivered += CAPSULE_VOLUME;
                         if (state == P_TOTAL_DELIVERED) {
-                            //int y = int(total_delivered+0.5);
-                            //print(TD,y);
-                        	print(TD, total_delivered);
+                            int y = (int)(total_delivered+0.5);
+                            print(TD,y);
+                        	//print(TD, total_delivered);
                         }
                         if (bolus_active) {
                             next_valve_change = current_time +MIN_FILL_TIME;
@@ -586,7 +587,6 @@ int factoryReset(){
 
 int recalculate_times(){
 
-	int myFlowRate = flow_rate;
     if(flow_rate>0){
         //dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
     	//fill_time = ((3600.0/((float)myFlowRate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
@@ -596,10 +596,22 @@ int recalculate_times(){
     	float temp = flow_rate/CAPSULE_VOLUME;
     	fill_time = 3600.0/temp;
     	fill_time = fill_time - DISPENSE_TIME;
+    	//__delay_cycles(50000);
+    	//this delay is one option to keep the microcontroller from freaking out
+    	//but I suspect the calculations going on right below here are also messing things up...
+    	//Suspicions confirmed. Bolus calculation was also messing up the value for flow_rate.
 
     }
     if (bolus_dosage > 0) {
-        max_bolus_count = (int)((double)bolus_dosage/CAPSULE_VOLUME)*(1.+((double)MIN_FILL_TIME+DISPENSE_TIME)/(3600.0/((double)flow_rate/CAPSULE_VOLUME))+0.5);
+    	//So, this original calculation was too big. Microcontroller cant handle it.
+        //max_bolus_count = (int)((double)bolus_dosage/CAPSULE_VOLUME)*(1.+((double)MIN_FILL_TIME+DISPENSE_TIME)/(3600.0/((double)flow_rate/CAPSULE_VOLUME))+0.5);
+    	//breaking it up into multiple easier calculations
+    	float temp = bolus_dosage/CAPSULE_VOLUME;
+    	float temp2 = flow_rate/CAPSULE_VOLUME;
+    	temp2 = 3600/temp2;
+    	temp = temp*temp2;
+    	temp = temp + 1.5;
+
     }
     bolus_countdown = 0;
     bolus_active = 0;
