@@ -104,6 +104,7 @@ volatile float fill_time = 0;
 volatile int timercount = 0;
 volatile int max_bolus_count = 0;
 volatile int bolus_count = 0;
+volatile int bolus_activated = 0;
 
 /* reverse:  reverse string s in place */
 void reverse(char s[])
@@ -475,6 +476,10 @@ void main (void){
             
             switch (valve) {
                 case FILL:
+                    if(bolus_activated){
+                    	next_valve_change = DISPENSE_TIME + MIN_FILL_TIME;
+                    	bolus_activated = 0;
+                    }
                     if (current_time >= next_valve_change) {
                         TACCR1 = servo_lut[DISPENSE_DEGREES];
                         current_time = 0;
@@ -572,6 +577,7 @@ int printBolusCountdown(){
 
 int deliverBolusDosage(){
     if (bolus_active == 0 && bolus_countdown == 0) {
+        bolus_activated = 1;
         bolus_active = 1;
         bolus_countdown = bolus_mins*60;
         bolus_countdown_prev = bolus_mins;
