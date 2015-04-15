@@ -608,9 +608,12 @@ int recalculate_times(){
     	//breaking it up into multiple easier calculations
     	float temp = bolus_dosage/CAPSULE_VOLUME;
     	float temp2 = flow_rate/CAPSULE_VOLUME;
+    	float temp3 = (float)MIN_FILL_TIME+DISPENSE_TIME;
     	temp2 = 3600/temp2;
+    	temp2 = temp3/temp2;
+    	temp2++;
     	temp = temp*temp2;
-    	temp = temp + 1.5;
+    	max_bolus_count = (int)(temp+0.5);
 
     }
     bolus_countdown = 0;
