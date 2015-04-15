@@ -41,9 +41,10 @@ void main (void){
     while (1){
 
         // Go to 0°
-        TACCR1 = servo_lut[0];
+        TACCR1 = servo_lut[136];
         __delay_cycles(100000);
 
+        /*
         // Go to 45°
         TACCR1 = servo_lut[45];
         __delay_cycles(100000);
@@ -66,5 +67,6 @@ void main (void){
             TACCR1 = servo_lut[i];
             __delay_cycles(20000);
         }
+        */
    }
 }
