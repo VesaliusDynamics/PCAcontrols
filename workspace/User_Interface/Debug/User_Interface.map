@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v4.3.3                      
 ******************************************************************************
->> Linked Thu Apr 16 16:32:21 2015
+>> Linked Sun Apr 19 16:31:26 2015
 
 OUTPUT FILE NAME:   <User_Interface.out>
-ENTRY POINT SYMBOL: "_c_int00"  address: 0000cf2e
+ENTRY POINT SYMBOL: "_c_int00"  address: 0000cf46
 
 
 MEMORY CONFIGURATION
@@ -14,12 +14,12 @@ MEMORY CONFIGURATION
   SFR                   00000000   00000010  00000000  00000010  RWIX
   PERIPHERALS_8BIT      00000010   000000f0  00000000  000000f0  RWIX
   PERIPHERALS_16BIT     00000100   00000100  00000000  00000100  RWIX
-  RAM                   00000200   00000200  00000086  0000017a  RWIX
+  RAM                   00000200   00000200  00000088  00000178  RWIX
   INFOD                 00001000   00000040  00000000  00000040  RWIX
   INFOC                 00001040   00000040  00000000  00000040  RWIX
   INFOB                 00001080   00000040  00000000  00000040  RWIX
   INFOA                 000010c0   00000040  00000000  00000040  RWIX
-  FLASH                 0000c000   00003fe0  00001143  00002e9d  RWIX
+  FLASH                 0000c000   00003fe0  0000115b  00002e85  RWIX
   INT00                 0000ffe0   00000002  00000000  00000002  RWIX
   INT01                 0000ffe2   00000002  00000000  00000002  RWIX
   INT02                 0000ffe4   00000002  00000002  00000000  RWIX
@@ -46,79 +46,79 @@ section   page    origin      length       input sections
 .init_array 
 *          0    0000c000    00000000     UNINITIALIZED
 
-.data      0    00000200    00000032     UNINITIALIZED
-                  00000200    00000032     main.obj (.data)
+.data      0    00000200    00000034     UNINITIALIZED
+                  00000200    00000034     main.obj (.data)
 
 .TI.persistent 
 *          0    00000200    00000000     UNINITIALIZED
 
-.bss       0    00000232    00000004     UNINITIALIZED
-                  00000232    00000002     (.common:i)
-                  00000234    00000002     (.common:j)
+.bss       0    00000234    00000004     UNINITIALIZED
+                  00000234    00000002     (.common:i)
+                  00000236    00000002     (.common:j)
 
 .TI.noinit 
-*          0    00000232    00000000     UNINITIALIZED
+*          0    00000234    00000000     UNINITIALIZED
 
 .stack     0    000003b0    00000050     UNINITIALIZED
                   000003b0    00000002     rts430_eabi.lib : boot.obj (.stack)
                   000003b2    0000004e     --HOLE--
 
-.text      0    0000c000    00001062     
-                  0000c000    000005aa     main.obj (.text:main)
-                  0000c5aa    00000130     rts430_eabi.lib : fs_add.obj (.text)
-                  0000c6da    000000da     main.obj (.text:recalculate_times)
-                  0000c7b4    000000c6     main.obj (.text:print)
-                  0000c87a    000000c2     rts430_eabi.lib : fs_mpy.obj (.text)
-                  0000c93c    000000a6     main.obj (.text:printBolusCountdown)
-                  0000c9e2    0000009a     rts430_eabi.lib : fs_div.obj (.text)
-                  0000ca7c    0000008a     main.obj (.text:Port_1)
-                  0000cb06    00000068     rts430_eabi.lib : fs_toi.obj (.text)
-                  0000cb6e    00000066     main.obj (.text:itoa)
-                  0000cbd4    0000005e     rts430_eabi.lib : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
-                  0000cc32    0000005e                     : autoinit.obj (.text:_auto_init)
-                  0000cc90    00000054     main.obj (.text:lcd_init)
-                  0000cce4    0000004a     main.obj (.text:Timer_A0)
-                  0000cd2e    0000004a     rts430_eabi.lib : fs_cmp.obj (.text)
-                  0000cd78    0000003e     main.obj (.text:send_command)
-                  0000cdb6    0000003e     main.obj (.text:send_data)
-                  0000cdf4    00000036     main.obj (.text:reverse)
-                  0000ce2a    00000036     rts430_eabi.lib : fs_itof.obj (.text)
-                  0000ce60    0000002e     main.obj (.text:delay)
-                  0000ce8e    0000002c     rts430_eabi.lib : asr16.obj (.text)
-                  0000ceba    0000002c                     : div16s.obj (.text)
-                  0000cee6    0000002a     main.obj (.text:deliverBolusDosage)
-                  0000cf10    0000001e     main.obj (.text:print_screen)
-                  0000cf2e    0000001a     rts430_eabi.lib : boot.obj (.text:_c_int00_noexit)
-                  0000cf48    0000001a                     : strcat.obj (.text:strcat)
-                  0000cf62    00000016     main.obj (.text:factoryReset)
-                  0000cf78    00000016     rts430_eabi.lib : div16u.obj (.text)
-                  0000cf8e    00000014                     : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
-                  0000cfa2    00000014                     : memset.obj (.text:memset)
-                  0000cfb6    00000014                     : mult16.obj (.text)
-                  0000cfca    00000014     main.obj (.text:send_string)
-                  0000cfde    00000012     rts430_eabi.lib : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
-                  0000cff0    00000012                     : memcpy.obj (.text:memcpy)
-                  0000d002    00000010     main.obj (.text:data_write)
-                  0000d012    00000010     rts430_eabi.lib : epilog.obj (.text)
-                  0000d022    00000010                     : strcpy.obj (.text:strcpy)
-                  0000d032    0000000e     main.obj (.text:check_busy)
-                  0000d040    0000000e     rts430_eabi.lib : strlen.obj (.text:strlen)
-                  0000d04e    00000006                     : isr_trap.obj (.text:__TI_ISR_TRAP)
-                  0000d054    00000006                     : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
-                  0000d05a    00000004                     : pre_init.obj (.text:_system_pre_init)
-                  0000d05e    00000004                     : exit.obj (.text:abort)
+.text      0    0000c000    0000107a     
+                  0000c000    000005be     main.obj (.text:main)
+                  0000c5be    00000130     rts430_eabi.lib : fs_add.obj (.text)
+                  0000c6ee    000000da     main.obj (.text:recalculate_times)
+                  0000c7c8    000000c6     main.obj (.text:print)
+                  0000c88e    000000c2     rts430_eabi.lib : fs_mpy.obj (.text)
+                  0000c950    000000a6     main.obj (.text:printBolusCountdown)
+                  0000c9f6    0000009a     rts430_eabi.lib : fs_div.obj (.text)
+                  0000ca90    0000008a     main.obj (.text:Port_1)
+                  0000cb1a    00000068     rts430_eabi.lib : fs_toi.obj (.text)
+                  0000cb82    00000066     main.obj (.text:itoa)
+                  0000cbe8    0000005e     rts430_eabi.lib : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
+                  0000cc46    0000005e                     : autoinit.obj (.text:_auto_init)
+                  0000cca4    00000054     main.obj (.text:lcd_init)
+                  0000ccf8    0000004a     main.obj (.text:Timer_A0)
+                  0000cd42    0000004a     rts430_eabi.lib : fs_cmp.obj (.text)
+                  0000cd8c    0000003e     main.obj (.text:send_command)
+                  0000cdca    0000003e     main.obj (.text:send_data)
+                  0000ce08    00000036     main.obj (.text:reverse)
+                  0000ce3e    00000036     rts430_eabi.lib : fs_itof.obj (.text)
+                  0000ce74    0000002e     main.obj (.text:delay)
+                  0000cea2    0000002e     main.obj (.text:deliverBolusDosage)
+                  0000ced0    0000002c     rts430_eabi.lib : asr16.obj (.text)
+                  0000cefc    0000002c                     : div16s.obj (.text)
+                  0000cf28    0000001e     main.obj (.text:print_screen)
+                  0000cf46    0000001a     rts430_eabi.lib : boot.obj (.text:_c_int00_noexit)
+                  0000cf60    0000001a                     : strcat.obj (.text:strcat)
+                  0000cf7a    00000016     main.obj (.text:factoryReset)
+                  0000cf90    00000016     rts430_eabi.lib : div16u.obj (.text)
+                  0000cfa6    00000014                     : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
+                  0000cfba    00000014                     : memset.obj (.text:memset)
+                  0000cfce    00000014                     : mult16.obj (.text)
+                  0000cfe2    00000014     main.obj (.text:send_string)
+                  0000cff6    00000012     rts430_eabi.lib : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
+                  0000d008    00000012                     : memcpy.obj (.text:memcpy)
+                  0000d01a    00000010     main.obj (.text:data_write)
+                  0000d02a    00000010     rts430_eabi.lib : epilog.obj (.text)
+                  0000d03a    00000010                     : strcpy.obj (.text:strcpy)
+                  0000d04a    0000000e     main.obj (.text:check_busy)
+                  0000d058    0000000e     rts430_eabi.lib : strlen.obj (.text:strlen)
+                  0000d066    00000006                     : isr_trap.obj (.text:__TI_ISR_TRAP)
+                  0000d06c    00000006                     : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
+                  0000d072    00000004                     : pre_init.obj (.text:_system_pre_init)
+                  0000d076    00000004                     : exit.obj (.text:abort)
 
-.const     0    0000d062    000000bb     
-                  0000d062    000000a2     main.obj (.const:.string)
-                  0000d104    00000014     main.obj (.const)
-                  0000d118    00000005     main.obj (.const:.string:$P$T0$1)
+.const     0    0000d07a    000000bb     
+                  0000d07a    000000a2     main.obj (.const:.string)
+                  0000d11c    00000014     main.obj (.const)
+                  0000d130    00000005     main.obj (.const:.string:$P$T0$1)
 
-.cinit     0    0000d11e    00000026     
-                  0000d11e    00000013     (.cinit..data.load) [load image, compression = rle]
-                  0000d131    00000001     --HOLE-- [fill = 0]
-                  0000d132    00000006     (__TI_handler_table)
-                  0000d138    00000004     (.cinit..bss.load) [load image, compression = zero_init]
-                  0000d13c    00000008     (__TI_cinit_table)
+.cinit     0    0000d136    00000026     
+                  0000d136    00000013     (.cinit..data.load) [load image, compression = rle]
+                  0000d149    00000001     --HOLE-- [fill = 0]
+                  0000d14a    00000006     (__TI_handler_table)
+                  0000d150    00000004     (.cinit..bss.load) [load image, compression = zero_init]
+                  0000d154    00000008     (__TI_cinit_table)
 
 PORT1      0    0000ffe4    00000002     
                   0000ffe4    00000002     main.obj (.int02)
@@ -169,14 +169,14 @@ NMI        0    0000fffc    00000002
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 0000d13c records: 2, size/record: 4, table size: 8
-	.data: load addr=0000d11e, load size=00000013 bytes, run addr=00000200, run size=00000032 bytes, compression=rle
-	.bss: load addr=0000d138, load size=00000004 bytes, run addr=00000232, run size=00000004 bytes, compression=zero_init
+__TI_cinit_table @ 0000d154 records: 2, size/record: 4, table size: 8
+	.data: load addr=0000d136, load size=00000013 bytes, run addr=00000200, run size=00000034 bytes, compression=rle
+	.bss: load addr=0000d150, load size=00000004 bytes, run addr=00000234, run size=00000004 bytes, compression=zero_init
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 0000d132 records: 3, size/record: 2, table size: 6
+__TI_handler_table @ 0000d14a records: 3, size/record: 2, table size: 6
 	index: 0, handler: __TI_zero_init
 	index: 1, handler: __TI_decompress_rle24
 	index: 2, handler: __TI_decompress_none
@@ -196,7 +196,7 @@ address    name
 00000057   BCSCTL1
 00000058   BCSCTL2
 00000053   BCSCTL3
-0000d05e   C$$EXIT
+0000d076   C$$EXIT
 00000059   CACTL1
 0000005a   CACTL2
 000010fb   CALBC1_12MHZ
@@ -208,11 +208,11 @@ address    name
 000010fe   CALDCO_1MHZ
 000010fc   CALDCO_8MHZ
 0000005b   CAPD
-0000d10a   CAPSULE_VOLUME
+0000d122   CAPSULE_VOLUME
 00000056   DCOCTL
-0000d104   DEFAULT_BOLUS_DOSAGE
-0000d106   DEFAULT_BOLUS_MINS
-0000d108   DEFAULT_FLOW_RATE
+0000d11c   DEFAULT_BOLUS_DOSAGE
+0000d11e   DEFAULT_BOLUS_MINS
+0000d120   DEFAULT_FLOW_RATE
 00000128   FCTL1
 0000012a   FCTL2
 0000012c   FCTL3
@@ -220,11 +220,11 @@ address    name
 00000001   IE2
 00000002   IFG1
 00000003   IFG2
-0000d10e   MAX_BOLUS_DOSAGE
-0000d110   MAX_BOLUS_MINS
-0000d114   MAX_FLOW_RATE
-0000d112   MINIMUM_BOLUS_MINS
-0000d116   MIN_FLOW_RATE
+0000d126   MAX_BOLUS_DOSAGE
+0000d128   MAX_BOLUS_MINS
+0000d12c   MAX_FLOW_RATE
+0000d12a   MINIMUM_BOLUS_MINS
+0000d12e   MIN_FLOW_RATE
 00000022   P1DIR
 00000025   P1IE
 00000024   P1IES
@@ -251,7 +251,7 @@ address    name
 00000043   P3SEL2
 00000202   PWM_Duty
 00000200   PWM_Period
-0000ca7c   Port_1
+0000ca90   Port_1
 00000172   TA0CCR0
 00000174   TA0CCR1
 00000176   TA0CCR2
@@ -275,7 +275,7 @@ address    name
 000010c0   TLV_CHECKSUM
 000010f7   TLV_DCO_30_LEN
 000010f6   TLV_DCO_30_TAG
-0000cce4   Timer_A0
+0000ccf8   Timer_A0
 0000005d   UCA0ABCTL
 00000062   UCA0BR0
 00000063   UCA0BR1
@@ -300,16 +300,16 @@ address    name
 00000120   WDTCTL
 00000400   __STACK_END
 00000050   __STACK_SIZE
-0000d13c   __TI_CINIT_Base
-0000d144   __TI_CINIT_Limit
-0000d132   __TI_Handler_Table_Base
-0000d138   __TI_Handler_Table_Limit
+0000d154   __TI_CINIT_Base
+0000d15c   __TI_CINIT_Limit
+0000d14a   __TI_Handler_Table_Base
+0000d150   __TI_Handler_Table_Limit
 UNDEFED    __TI_INITARRAY_Base
 UNDEFED    __TI_INITARRAY_Limit
-0000d04e   __TI_ISR_TRAP
+0000d066   __TI_ISR_TRAP
 00000001   __TI_args_main
-0000cfde   __TI_decompress_none
-0000d054   __TI_decompress_rle24
+0000cff6   __TI_decompress_none
+0000d06c   __TI_decompress_rle24
 00000001   __TI_exit
 0000ffe4   __TI_int02
 0000ffe6   __TI_int03
@@ -323,52 +323,53 @@ UNDEFED    __TI_INITARRAY_Limit
 0000fff8   __TI_int12
 0000fffa   __TI_int13
 0000fffc   __TI_int14
-0000cf8e   __TI_zero_init
+0000cfa6   __TI_zero_init
 ffffffff   __binit__
 ffffffff   __c_args__
-0000c5b0   __mspabi_addf
-0000cd2e   __mspabi_cmpf
-0000c9e2   __mspabi_divf
-0000ceba   __mspabi_divi
-0000cf78   __mspabi_divu
-0000cb06   __mspabi_fixfi
-0000ce2a   __mspabi_fltif
-0000d01e   __mspabi_func_epilog_1
-0000d01c   __mspabi_func_epilog_2
-0000d01a   __mspabi_func_epilog_3
-0000d018   __mspabi_func_epilog_4
-0000d016   __mspabi_func_epilog_5
-0000d014   __mspabi_func_epilog_6
-0000d012   __mspabi_func_epilog_7
-0000c87a   __mspabi_mpyf
-0000cfb6   __mspabi_mpyi
-0000ceba   __mspabi_remi
-0000cf78   __mspabi_remu
-0000ce8e   __mspabi_srai
-0000ceb6   __mspabi_srai_1
-0000cea4   __mspabi_srai_10
-0000cea2   __mspabi_srai_11
-0000cea0   __mspabi_srai_12
-0000ce9e   __mspabi_srai_13
-0000ce9c   __mspabi_srai_14
-0000ce9a   __mspabi_srai_15
-0000ceb4   __mspabi_srai_2
-0000ceb2   __mspabi_srai_3
-0000ceb0   __mspabi_srai_4
-0000ceae   __mspabi_srai_5
-0000ceac   __mspabi_srai_6
-0000ceaa   __mspabi_srai_7
-0000cea8   __mspabi_srai_8
-0000cea6   __mspabi_srai_9
-0000c5aa   __mspabi_subf
-0000cc32   _auto_init
-0000cf2e   _c_int00
-0000cf2e   _c_int00_noexit
+0000c5c4   __mspabi_addf
+0000cd42   __mspabi_cmpf
+0000c9f6   __mspabi_divf
+0000cefc   __mspabi_divi
+0000cf90   __mspabi_divu
+0000cb1a   __mspabi_fixfi
+0000ce3e   __mspabi_fltif
+0000d036   __mspabi_func_epilog_1
+0000d034   __mspabi_func_epilog_2
+0000d032   __mspabi_func_epilog_3
+0000d030   __mspabi_func_epilog_4
+0000d02e   __mspabi_func_epilog_5
+0000d02c   __mspabi_func_epilog_6
+0000d02a   __mspabi_func_epilog_7
+0000c88e   __mspabi_mpyf
+0000cfce   __mspabi_mpyi
+0000cefc   __mspabi_remi
+0000cf90   __mspabi_remu
+0000ced0   __mspabi_srai
+0000cef8   __mspabi_srai_1
+0000cee6   __mspabi_srai_10
+0000cee4   __mspabi_srai_11
+0000cee2   __mspabi_srai_12
+0000cee0   __mspabi_srai_13
+0000cede   __mspabi_srai_14
+0000cedc   __mspabi_srai_15
+0000cef6   __mspabi_srai_2
+0000cef4   __mspabi_srai_3
+0000cef2   __mspabi_srai_4
+0000cef0   __mspabi_srai_5
+0000ceee   __mspabi_srai_6
+0000ceec   __mspabi_srai_7
+0000ceea   __mspabi_srai_8
+0000cee8   __mspabi_srai_9
+0000c5be   __mspabi_subf
+0000cc46   _auto_init
+0000cf46   _c_int00
+0000cf46   _c_int00_noexit
 0000fffe   _reset_vector
 000003b0   _stack
-0000d05a   _system_pre_init
-0000d05e   abort
+0000d072   _system_pre_init
+0000d076   abort
 ffffffff   binit
+00000232   bolus_activated
 00000214   bolus_active
 00000230   bolus_count
 0000021e   bolus_countdown
@@ -377,37 +378,37 @@ ffffffff   binit
 00000224   bolus_dosage_changed
 0000020c   bolus_mins
 00000204   button
-0000d032   check_busy
+0000d04a   check_busy
 00000206   count
 00000216   current_time
-0000d002   data_write
-0000ce60   delay
-0000cee6   deliverBolusDosage
+0000d01a   data_write
+0000ce74   delay
+0000cea2   deliverBolusDosage
 00000226   dosage_cycle
-0000cf62   factoryReset
+0000cf7a   factoryReset
 00000228   fill_time
 0000020e   flow_rate
 00000222   flow_rate_changed
-00000232   i
-0000cb6e   itoa
-00000234   j
-0000cc90   lcd_init
+00000234   i
+0000cb82   itoa
+00000236   j
+0000cca4   lcd_init
 0000c000   main
 0000022e   max_bolus_count
-0000cff0   memcpy
-0000cfa2   memset
+0000d008   memcpy
+0000cfba   memset
 0000021a   next_valve_change
-0000c7b4   print
-0000c93c   printBolusCountdown
-0000cf10   print_screen
-0000c6da   recalculate_times
-0000cdf4   reverse
-0000cd78   send_command
-0000cdb6   send_data
-0000cfca   send_string
-0000cf48   strcat
-0000d022   strcpy
-0000d040   strlen
+0000c7c8   print
+0000c950   printBolusCountdown
+0000cf28   print_screen
+0000c6ee   recalculate_times
+0000ce08   reverse
+0000cd8c   send_command
+0000cdca   send_data
+0000cfe2   send_string
+0000cf60   strcat
+0000d03a   strcpy
+0000d058   strlen
 0000022c   timercount
 00000210   total_delivered
 00000208   valve
@@ -526,8 +527,9 @@ address    name
 0000022c   timercount
 0000022e   max_bolus_count
 00000230   bolus_count
-00000232   i
-00000234   j
+00000232   bolus_activated
+00000234   i
+00000236   j
 000003b0   _stack
 00000400   __STACK_END
 000010c0   TLV_CHECKSUM
@@ -544,86 +546,86 @@ address    name
 000010fe   CALDCO_1MHZ
 000010ff   CALBC1_1MHZ
 0000c000   main
-0000c5aa   __mspabi_subf
-0000c5b0   __mspabi_addf
-0000c6da   recalculate_times
-0000c7b4   print
-0000c87a   __mspabi_mpyf
-0000c93c   printBolusCountdown
-0000c9e2   __mspabi_divf
-0000ca7c   Port_1
-0000cb06   __mspabi_fixfi
-0000cb6e   itoa
-0000cc32   _auto_init
-0000cc90   lcd_init
-0000cce4   Timer_A0
-0000cd2e   __mspabi_cmpf
-0000cd78   send_command
-0000cdb6   send_data
-0000cdf4   reverse
-0000ce2a   __mspabi_fltif
-0000ce60   delay
-0000ce8e   __mspabi_srai
-0000ce9a   __mspabi_srai_15
-0000ce9c   __mspabi_srai_14
-0000ce9e   __mspabi_srai_13
-0000cea0   __mspabi_srai_12
-0000cea2   __mspabi_srai_11
-0000cea4   __mspabi_srai_10
-0000cea6   __mspabi_srai_9
-0000cea8   __mspabi_srai_8
-0000ceaa   __mspabi_srai_7
-0000ceac   __mspabi_srai_6
-0000ceae   __mspabi_srai_5
-0000ceb0   __mspabi_srai_4
-0000ceb2   __mspabi_srai_3
-0000ceb4   __mspabi_srai_2
-0000ceb6   __mspabi_srai_1
-0000ceba   __mspabi_divi
-0000ceba   __mspabi_remi
-0000cee6   deliverBolusDosage
-0000cf10   print_screen
-0000cf2e   _c_int00
-0000cf2e   _c_int00_noexit
-0000cf48   strcat
-0000cf62   factoryReset
-0000cf78   __mspabi_divu
-0000cf78   __mspabi_remu
-0000cf8e   __TI_zero_init
-0000cfa2   memset
-0000cfb6   __mspabi_mpyi
-0000cfca   send_string
-0000cfde   __TI_decompress_none
-0000cff0   memcpy
-0000d002   data_write
-0000d012   __mspabi_func_epilog_7
-0000d014   __mspabi_func_epilog_6
-0000d016   __mspabi_func_epilog_5
-0000d018   __mspabi_func_epilog_4
-0000d01a   __mspabi_func_epilog_3
-0000d01c   __mspabi_func_epilog_2
-0000d01e   __mspabi_func_epilog_1
-0000d022   strcpy
-0000d032   check_busy
-0000d040   strlen
-0000d04e   __TI_ISR_TRAP
-0000d054   __TI_decompress_rle24
-0000d05a   _system_pre_init
-0000d05e   C$$EXIT
-0000d05e   abort
-0000d104   DEFAULT_BOLUS_DOSAGE
-0000d106   DEFAULT_BOLUS_MINS
-0000d108   DEFAULT_FLOW_RATE
-0000d10a   CAPSULE_VOLUME
-0000d10e   MAX_BOLUS_DOSAGE
-0000d110   MAX_BOLUS_MINS
-0000d112   MINIMUM_BOLUS_MINS
-0000d114   MAX_FLOW_RATE
-0000d116   MIN_FLOW_RATE
-0000d132   __TI_Handler_Table_Base
-0000d138   __TI_Handler_Table_Limit
-0000d13c   __TI_CINIT_Base
-0000d144   __TI_CINIT_Limit
+0000c5be   __mspabi_subf
+0000c5c4   __mspabi_addf
+0000c6ee   recalculate_times
+0000c7c8   print
+0000c88e   __mspabi_mpyf
+0000c950   printBolusCountdown
+0000c9f6   __mspabi_divf
+0000ca90   Port_1
+0000cb1a   __mspabi_fixfi
+0000cb82   itoa
+0000cc46   _auto_init
+0000cca4   lcd_init
+0000ccf8   Timer_A0
+0000cd42   __mspabi_cmpf
+0000cd8c   send_command
+0000cdca   send_data
+0000ce08   reverse
+0000ce3e   __mspabi_fltif
+0000ce74   delay
+0000cea2   deliverBolusDosage
+0000ced0   __mspabi_srai
+0000cedc   __mspabi_srai_15
+0000cede   __mspabi_srai_14
+0000cee0   __mspabi_srai_13
+0000cee2   __mspabi_srai_12
+0000cee4   __mspabi_srai_11
+0000cee6   __mspabi_srai_10
+0000cee8   __mspabi_srai_9
+0000ceea   __mspabi_srai_8
+0000ceec   __mspabi_srai_7
+0000ceee   __mspabi_srai_6
+0000cef0   __mspabi_srai_5
+0000cef2   __mspabi_srai_4
+0000cef4   __mspabi_srai_3
+0000cef6   __mspabi_srai_2
+0000cef8   __mspabi_srai_1
+0000cefc   __mspabi_divi
+0000cefc   __mspabi_remi
+0000cf28   print_screen
+0000cf46   _c_int00
+0000cf46   _c_int00_noexit
+0000cf60   strcat
+0000cf7a   factoryReset
+0000cf90   __mspabi_divu
+0000cf90   __mspabi_remu
+0000cfa6   __TI_zero_init
+0000cfba   memset
+0000cfce   __mspabi_mpyi
+0000cfe2   send_string
+0000cff6   __TI_decompress_none
+0000d008   memcpy
+0000d01a   data_write
+0000d02a   __mspabi_func_epilog_7
+0000d02c   __mspabi_func_epilog_6
+0000d02e   __mspabi_func_epilog_5
+0000d030   __mspabi_func_epilog_4
+0000d032   __mspabi_func_epilog_3
+0000d034   __mspabi_func_epilog_2
+0000d036   __mspabi_func_epilog_1
+0000d03a   strcpy
+0000d04a   check_busy
+0000d058   strlen
+0000d066   __TI_ISR_TRAP
+0000d06c   __TI_decompress_rle24
+0000d072   _system_pre_init
+0000d076   C$$EXIT
+0000d076   abort
+0000d11c   DEFAULT_BOLUS_DOSAGE
+0000d11e   DEFAULT_BOLUS_MINS
+0000d120   DEFAULT_FLOW_RATE
+0000d122   CAPSULE_VOLUME
+0000d126   MAX_BOLUS_DOSAGE
+0000d128   MAX_BOLUS_MINS
+0000d12a   MINIMUM_BOLUS_MINS
+0000d12c   MAX_FLOW_RATE
+0000d12e   MIN_FLOW_RATE
+0000d14a   __TI_Handler_Table_Base
+0000d150   __TI_Handler_Table_Limit
+0000d154   __TI_CINIT_Base
+0000d15c   __TI_CINIT_Limit
 0000ffe4   __TI_int02
 0000ffe6   __TI_int03
 0000ffea   __TI_int05
@@ -643,4 +645,4 @@ ffffffff   binit
 UNDEFED    __TI_INITARRAY_Base
 UNDEFED    __TI_INITARRAY_Limit
 
-[225 symbols]
+[226 symbols]
