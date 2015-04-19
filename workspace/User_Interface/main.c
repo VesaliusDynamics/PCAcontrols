@@ -12,14 +12,15 @@
 #define SERVO_MIN           700     // The minimum duty cycle for this servo
 #define SERVO_MAX           3000    // The maximum duty cycle
 
+//old values
+//#define FILL_DEGREES		50		//Servo position to fill dosage capsule
+//#define DISPENSE_DEGREES	135		//Servo position to dispense dosage capsule
 
 #define FILL_DEGREES		50		//Servo position to fill dosage capsule
 #define DISPENSE_DEGREES	135		//Servo position to dispense dosage capsule
 
-//#define FILL_DEGREES		50		//Servo position to fill dosage capsule
-//#define DISPENSE_DEGREES	136		//Servo position to dispense dosage capsule
-
-#define DISPENSE_TIME       60     //time to dispense dosage capsule
+//#define DISPENSE_TIME       60     //time to dispense dosage capsule
+#define DISPENSE_TIME       45     //time to dispense dosage capsule
 #define MIN_FILL_TIME       30     //minimum time to fill dosage capsule
 
 unsigned int PWM_Period     = (MCU_CLOCK / PWM_FREQUENCY);  // PWM Period
@@ -75,7 +76,7 @@ const int DEFAULT_BOLUS_DOSAGE = 0;
 const int DEFAULT_BOLUS_MINS = 60;
 const int DEFAULT_FLOW_RATE = 0;
 //const int DEFAULT_FLOW_RATE = 15;
-const float CAPSULE_VOLUME = 0.9;		//volume in mL of dosage capsule
+const float CAPSULE_VOLUME = 0.85;		//volume in mL of dosage capsule
 
 int bolus_dosage = DEFAULT_BOLUS_DOSAGE;
 int bolus_mins = DEFAULT_BOLUS_MINS;

@@ -13,16 +13,16 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="FILL_DEGREES" key="selection"/>
+		<item value="current_time" key="selection"/>
 		<list key="findhistory">
+			<item value="current_time"/>
+			<item value="0.85"/>
+			<item value="fill_time"/>
 			<item value="FILL_DEGREES"/>
 			<item value="total_delivered"/>
 			<item value="valve"/>
 			<item value="recal"/>
 			<item value="recalculate"/>
-			<item value="FR,flow"/>
-			<item value="FR, flow"/>
-			<item value="flow_rate"/>
 		</list>
 		<list key="replacehistory">
 			<item value="my_flow_rate"/>

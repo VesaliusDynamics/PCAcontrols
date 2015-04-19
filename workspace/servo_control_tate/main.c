@@ -37,12 +37,17 @@ void main (void){
     P1DIR   |= BIT2;               // P1.2 = output
     P1SEL   |= BIT2;               // P1.2 = TA1 output
 
+
+    // Go to 0°
+    TACCR1 = servo_lut[50];
+    __delay_cycles(1000000);
+
+    // Go to 0°
+    TACCR1 = servo_lut[135];
+    __delay_cycles(1000000);
+
     // Main loop
     while (1){
-
-        // Go to 0°
-        TACCR1 = servo_lut[136];
-        __delay_cycles(100000);
 
         /*
         // Go to 45°
