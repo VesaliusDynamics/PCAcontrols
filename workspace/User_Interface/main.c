@@ -645,27 +645,67 @@ __interrupt void    Port_1(void)
 {
     if (CHECK_BIT(P1IFG, 4)){
         //P1.4 pin triggered
-        __delay_cycles(50000);	//debounce code
-        button   =   BOLUS;
-        P1IFG  &=  (~BIT4);    //  P1.4    IFG clear
+        //P1IE &= (~BIT4);
+        //__delay_cycles(50000);	//debounce code
+        
+        //P1IFG  &=  (~BIT4);    //  P1.4    IFG clear
+        
+        P1IFG &= ~BIT4;      // Clear the flag
+  	P1IE &= ~BIT4;       // Temporarily disable the interrupt (for 8ms)
+	button   =   BOLUS;
+	  //WDT as 8ms interval counter, enables the port_1 interrupt after 8ms, 
+	  //so PORT1_ISR isn't called when button bounces
+  	IFG1 &= ~WDTIFG;  //clear any existing WDT Interrupt flags
+	WDTCTL = WDTPW | WDTSSEL | WDTTMSEL | WDTCNTCL | WDT_MDLY_8; //config WDT for 8ms
+	IE1 |= WDTIE; //activate WDT interrupt
+  
     } else if (CHECK_BIT(P1IFG, 5)) {
         //P1.7 pin triggered
-        __delay_cycles(50000);	//debounce code
-        button   =   RESET;
-        P1IFG  &=  (~BIT5);    //  P1.5    IFG clear
+        //__delay_cycles(50000);	//debounce code
+       // button   =   RESET;
+       // P1IFG  &=  (~BIT5);    //  P1.5    IFG clear
+        P1IFG &= ~BIT5;      // Clear the flag
+  	P1IE &= ~BIT5;       // Temporarily disable the interrupt (for 8ms)
+	button   =   RESET;
+  	IFG1 &= ~WDTIFG;  //clear any existing WDT Interrupt flags
+	WDTCTL = WDTPW | WDTSSEL | WDTTMSEL | WDTCNTCL | WDT_MDLY_8; //config WDT for 8ms
+	IE1 |= WDTIE; //activate WDT interrupt
     } else if (CHECK_BIT(P1IFG, 6)){
         //P1.6 pin triggered
-        __delay_cycles(50000);	//debounce code
-        button   =   UP;
-        P1IFG  &=  (~BIT6);    //  P1.6    IFG clear
+        //__delay_cycles(50000);	//debounce code
+        //button   =   UP;
+        //P1IFG  &=  (~BIT6);    //  P1.6    IFG clear
+        P1IFG &= ~BIT6;      // Clear the flag
+  	P1IE &= ~BIT6;       // Temporarily disable the interrupt (for 8ms)
+	button   =   UP;
+  	IFG1 &= ~WDTIFG;  //clear any existing WDT Interrupt flags
+	WDTCTL = WDTPW | WDTSSEL | WDTTMSEL | WDTCNTCL | WDT_MDLY_8; //config WDT for 8ms
+	IE1 |= WDTIE; //activate WDT interrupt
+        
     } else if (CHECK_BIT(P1IFG, 7)) {
         //P1.7 pin triggered
-        __delay_cycles(50000);	//debounce code
-        button   =   DOWN;
-        P1IFG  &=  (~BIT7);    //  P1.7    IFG clear
+       // __delay_cycles(50000);	//debounce code
+        //button   =   DOWN;
+       // P1IFG  &=  (~BIT7);    //  P1.7    IFG clear
+        P1IFG &= ~BIT7;      // Clear the flag
+  	P1IE &= ~BIT7;       // Temporarily disable the interrupt (for 8ms)
+	button   = DOWN;
+  	IFG1 &= ~WDTIFG;  //clear any existing WDT Interrupt flags
+	WDTCTL = WDTPW | WDTSSEL | WDTTMSEL | WDTCNTCL | WDT_MDLY_8; //config WDT for 8ms
+	IE1 |= WDTIE; //activate WDT interrupt
     }
 }
 
+#pragma vector=WDT_VECTOR
+__interrupt void WDT_ISR(void)
+{
+  
+  IE1 &= ~WDTIE;                   /* disable interrupt */
+  IFG1 &= ~WDTIFG;                 /* clear interrupt flag */
+  WDTCTL = WDTPW | WDTHOLD; //disable WDT
+  P1IE = BIT4 | BIT5 | BIT6 | BIT7; 
+  
+}
 
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void Timer_A0 (void){
