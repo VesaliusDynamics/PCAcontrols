@@ -12,14 +12,9 @@
 #define SERVO_MIN           700     // The minimum duty cycle for this servo
 #define SERVO_MAX           3000    // The maximum duty cycle
 
-//old values
-//#define FILL_DEGREES		50		//Servo position to fill dosage capsule
-//#define DISPENSE_DEGREES	135		//Servo position to dispense dosage capsule
-
 #define FILL_DEGREES		50		//Servo position to fill dosage capsule
 #define DISPENSE_DEGREES	135		//Servo position to dispense dosage capsule
 
-//#define DISPENSE_TIME       60     //time to dispense dosage capsule
 #define DISPENSE_TIME       45     //time to dispense dosage capsule
 #define MIN_FILL_TIME       30     //minimum time to fill dosage capsule
 
@@ -122,7 +117,7 @@ void reverse(char s[])
 /* itoa:  convert n to characters in s */
 void itoa(int x, char s[])
 {
-	//http://stackoverflow.com/questions/190229/where-is-the-itoa-function-in-linux
+//http://stackoverflow.com/questions/190229/where-is-the-itoa-function-in-linux
     int i, sign;
     int n = x;
 
@@ -462,9 +457,6 @@ void main (void){
                 break;
                 
             default:
-                //TODO
-                //throw some sort of error condition
-                //turn flow off or something?
                 break;
         }
         
@@ -496,7 +488,6 @@ void main (void){
                         if (state == P_TOTAL_DELIVERED) {
                             int y = (int)(total_delivered+0.5);
                             print(TD,y);
-                        	//print(TD, total_delivered);
                         }
                         if (bolus_active) {
                             next_valve_change = current_time +MIN_FILL_TIME;
@@ -525,28 +516,6 @@ void main (void){
     }
 }
 
-/*
-int printFlowRate(){
-    char str[16];
-    sprintf(str, "%d mL/hour", (int)flow_rate);
-    print_screen("Flow rate:", str);
-    return 0;
-}
-
-int printBolusMins(){
-    char str[16];
-    sprintf(str, "%d mL", (int)bolus_mins);
-    print_screen("Bolus time:", str);
-    return 0;
-}
-
-int printTotalDelivered(){
-    char str[16];
-    sprintf(str, "%d mL", (int)total_delivered);
-    print_screen("Total delivered:", str);
-    return 0;
-}
-*/
 
 int printBolusCountdown(){
     
@@ -568,8 +537,6 @@ int printBolusCountdown(){
     char min[5] = " min";
     min[4] = '\0';
     strcat(minutes,min);
-    //char str[16];
-    //sprintf(str, "%d min", minutes_left);
     print_screen("Bolus countdown:", minutes);
     
     return 0;
@@ -600,24 +567,11 @@ int factoryReset(){
 int recalculate_times(){
 
     if(flow_rate>0){
-        //dosage_cycle = 3600/(flow_rate/CAPSULE_VOLUME);	//number of seconds to complete one dosage cycle
-    	//fill_time = ((3600.0/((float)myFlowRate/CAPSULE_VOLUME)) - DISPENSE_TIME);	//total time to leave valve on fill
-    	//it seems like for some reason the microcontroller isnt able to handle this statement ^^^^^^^^
-    	//so I just split it up into a number of smaller statements and now it seems to work fine
-
     	float temp = flow_rate/CAPSULE_VOLUME;
     	fill_time = 3600.0/temp;
     	fill_time = fill_time - DISPENSE_TIME;
-    	//__delay_cycles(50000);
-    	//this delay is one option to keep the microcontroller from freaking out
-    	//but I suspect the calculations going on right below here are also messing things up...
-    	//Suspicions confirmed. Bolus calculation was also messing up the value for flow_rate.
-
     }
     if (bolus_dosage > 0) {
-    	//So, this original calculation was too big. Microcontroller cant handle it.
-        //max_bolus_count = (int)((double)bolus_dosage/CAPSULE_VOLUME)*(1.+((double)MIN_FILL_TIME+DISPENSE_TIME)/(3600.0/((double)flow_rate/CAPSULE_VOLUME))+0.5);
-    	//breaking it up into multiple easier calculations
     	float temp = bolus_dosage/CAPSULE_VOLUME;
     	float temp2 = flow_rate/CAPSULE_VOLUME;
     	float temp3 = (float)MIN_FILL_TIME+DISPENSE_TIME;
@@ -644,26 +598,16 @@ int recalculate_times(){
 __interrupt void    Port_1(void)
 {
     if (CHECK_BIT(P1IFG, 4)){
-        //P1.4 pin triggered
-        //P1IE &= (~BIT4);
-        //__delay_cycles(50000);	//debounce code
         
-        //P1IFG  &=  (~BIT4);    //  P1.4    IFG clear
         
         P1IFG &= ~BIT4;      // Clear the flag
   	P1IE &= ~BIT4;       // Temporarily disable the interrupt (for 8ms)
 	button   =   BOLUS;
-	  //WDT as 8ms interval counter, enables the port_1 interrupt after 8ms, 
-	  //so PORT1_ISR isn't called when button bounces
   	IFG1 &= ~WDTIFG;  //clear any existing WDT Interrupt flags
 	WDTCTL = WDTPW | WDTSSEL | WDTTMSEL | WDTCNTCL | WDT_MDLY_8; //config WDT for 8ms
 	IE1 |= WDTIE; //activate WDT interrupt
   
     } else if (CHECK_BIT(P1IFG, 5)) {
-        //P1.7 pin triggered
-        //__delay_cycles(50000);	//debounce code
-       // button   =   RESET;
-       // P1IFG  &=  (~BIT5);    //  P1.5    IFG clear
         P1IFG &= ~BIT5;      // Clear the flag
   	P1IE &= ~BIT5;       // Temporarily disable the interrupt (for 8ms)
 	button   =   RESET;
@@ -671,10 +615,6 @@ __interrupt void    Port_1(void)
 	WDTCTL = WDTPW | WDTSSEL | WDTTMSEL | WDTCNTCL | WDT_MDLY_8; //config WDT for 8ms
 	IE1 |= WDTIE; //activate WDT interrupt
     } else if (CHECK_BIT(P1IFG, 6)){
-        //P1.6 pin triggered
-        //__delay_cycles(50000);	//debounce code
-        //button   =   UP;
-        //P1IFG  &=  (~BIT6);    //  P1.6    IFG clear
         P1IFG &= ~BIT6;      // Clear the flag
   	P1IE &= ~BIT6;       // Temporarily disable the interrupt (for 8ms)
 	button   =   UP;
@@ -683,10 +623,6 @@ __interrupt void    Port_1(void)
 	IE1 |= WDTIE; //activate WDT interrupt
         
     } else if (CHECK_BIT(P1IFG, 7)) {
-        //P1.7 pin triggered
-       // __delay_cycles(50000);	//debounce code
-        //button   =   DOWN;
-       // P1IFG  &=  (~BIT7);    //  P1.7    IFG clear
         P1IFG &= ~BIT7;      // Clear the flag
   	P1IE &= ~BIT7;       // Temporarily disable the interrupt (for 8ms)
 	button   = DOWN;
